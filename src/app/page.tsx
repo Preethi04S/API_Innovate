@@ -96,7 +96,7 @@ export default function Dashboard() {
   const isCritical = state.incident?.severity === "critical";
 
   return (
-    <div className={`min-h-screen bg-[#060a14] transition-all duration-1000 ${isCritical && !state.isAnalyzing ? "bg-[#0a0508]" : ""}`}>
+    <div className={`min-h-screen overflow-auto bg-[#060a14] transition-all duration-1000 ${isCritical && !state.isAnalyzing ? "bg-[#0a0508]" : ""}`}>
       {/* Critical alert overlay */}
       <CriticalAlert show={showCriticalAlert} title={state.incident?.title ?? ""} />
 
@@ -115,7 +115,7 @@ export default function Dashboard() {
         )}
       </div>
 
-      <div className="relative z-10 flex flex-col min-h-screen">
+      <div className="relative z-10 flex flex-col min-h-screen overflow-x-auto">
         <Header
           onReset={resetAll}
           onInstantDemo={loadDemoResult}
@@ -126,7 +126,7 @@ export default function Dashboard() {
         />
 
         <div className="flex-1">
-          <div className="max-w-[1920px] mx-auto px-4 py-3 space-y-3">
+          <div className="max-w-[1920px] mx-auto px-4 py-3 space-y-3 min-w-[1200px]">
             <ScenarioSelector
               scenarios={state.scenarios}
               activeScenarioId={state.activeScenarioId}

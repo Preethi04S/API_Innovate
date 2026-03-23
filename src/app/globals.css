@@ -123,20 +123,11 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-size: 15px;
   }
   html {
     @apply font-sans;
-    font-size: 15px;
   }
 }
-
-/* Boost all small text for readability */
-.text-xs { font-size: 0.8rem !important; }
-.text-\[11px\] { font-size: 0.8rem !important; }
-.text-\[10px\] { font-size: 0.75rem !important; }
-.text-\[9px\]  { font-size: 0.72rem !important; }
-.text-sm { font-size: 0.875rem !important; }
 
 /* Premium SOC animations */
 @keyframes pulse-glow {

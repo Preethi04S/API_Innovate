@@ -383,6 +383,13 @@ function buildFallbackIncident(events: TelemetryEvent[]): IncidentAnalysis {
   };
 }
 
+const SIMULATION_PRESETS: Record<string, { risk_after: number; timeline: string; consequences: string[]; recommendation: string }> = {
+  isolate_device:    { risk_after: 18, timeline: "2–5 minutes", consequences: ["Network threat neutralised", "Device quarantined", "Lateral movement stopped", "Exfiltration channel severed"], recommendation: "Execute immediately — highest risk reduction with minimal downtime." },
+  revoke_badge:      { risk_after: 35, timeline: "Immediate",   consequences: ["Physical access revoked", "Insider threat contained", "Audit trail preserved", "Backup credentials may still exist"], recommendation: "Proceed — essential for physical containment." },
+  delay_containment: { risk_after: 88, timeline: "30+ minutes", consequences: ["Additional data at risk", "Attacker gains persistence", "Forensic window closing", "Regulatory exposure increases"], recommendation: "Not recommended — delay compounds damage significantly." },
+  ignore_event:      { risk_after: 96, timeline: "Ongoing",     consequences: ["Full compromise likely", "All data at risk", "No forensic evidence collected", "Regulatory violations probable"], recommendation: "Do not ignore — treat as active breach." },
+};
+
 export async function simulateCounterfactual(
   incident: IncidentAnalysis,
   action: string,
@@ -395,54 +402,50 @@ export async function simulateCounterfactual(
   consequences: string[];
   recommendation: string;
 }> {
-  const client = getASIClient();
+  const riskBefore = Math.round((incident.confidence ?? 0.85) * 100);
 
-  const response = await client.chat.completions.create({
-    model: ASI_MODEL,
-    messages: [
-      {
-        role: "system",
-        content: `You are a risk simulation engine. Given an incident and a proposed containment action, project the outcome. Respond with ONLY a JSON object (no markdown fences) with these fields:
+  // Try live ASI-1 first, fall back to presets if it fails
+  try {
+    const client = getASIClient();
+    const response = await client.chat.completions.create({
+      model: ASI_MODEL,
+      messages: [
+        {
+          role: "system",
+          content: `You are a risk simulation engine. Given an incident and a proposed containment action, project the outcome. Respond with ONLY a JSON object (no markdown fences) with these fields:
 - action (string): the action being evaluated
 - risk_before (number 0-100): current risk level
 - risk_after (number 0-100): projected risk after action
 - timeline (string): expected time to see effect
 - consequences (string[]): list of 3-4 projected consequences
 - recommendation (string): whether to proceed and why`,
-      },
-      {
-        role: "user",
-        content: `Incident: ${JSON.stringify(incident)}\n\nProposed action: ${action}\nTarget: ${target}`,
-      },
-    ],
-  });
+        },
+        {
+          role: "user",
+          content: `Incident: ${JSON.stringify(incident)}\n\nProposed action: ${action}\nTarget: ${target}`,
+        },
+      ],
+    });
 
-  const content = response.choices[0]?.message?.content || "";
-
-  // Strip markdown fences
-  const stripped = content.replace(/^```(?:json)?\s*/m, "").replace(/```\s*$/m, "").trim();
-  try {
-    return JSON.parse(stripped);
-  } catch {
-    // try raw JSON search
-  }
-
-  try {
+    const content = response.choices[0]?.message?.content || "";
+    const stripped = content.replace(/^```(?:json)?\s*/m, "").replace(/```\s*$/m, "").trim();
+    try { return JSON.parse(stripped); } catch { /* fall through */ }
     const braceStart = content.indexOf("{");
     const braceEnd = content.lastIndexOf("}");
     if (braceStart !== -1 && braceEnd > braceStart) {
-      return JSON.parse(content.slice(braceStart, braceEnd + 1));
+      try { return JSON.parse(content.slice(braceStart, braceEnd + 1)); } catch { /* fall through */ }
     }
   } catch {
-    // fallback
+    // ASI-1 unavailable — use presets below
   }
 
-  return {
-    action,
-    risk_before: 75,
-    risk_after: action === "ignore_event" ? 90 : 30,
-    timeline: "Immediate",
-    consequences: ["Risk reduced through prompt containment action"],
-    recommendation: "Proceed with containment",
+  // Pre-computed realistic simulation results
+  const preset = SIMULATION_PRESETS[action] ?? {
+    risk_after: 50,
+    timeline: "5–15 minutes",
+    consequences: ["Risk partially mitigated", "Monitoring recommended", "Follow-up assessment required"],
+    recommendation: "Proceed with caution.",
   };
+
+  return { action, risk_before: riskBefore, ...preset };
 }

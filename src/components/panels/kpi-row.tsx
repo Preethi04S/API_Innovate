@@ -51,7 +51,7 @@ interface KpiCardProps {
 
 function KpiCard({ icon, label, value, suffix, color, glowColor, trend, trendLabel }: KpiCardProps) {
   return (
-    <div className={`relative group rounded-xl border border-white/[0.06] bg-[#0d1117]/80 backdrop-blur-sm p-4 overflow-hidden transition-all hover:border-white/[0.1]`}>
+    <div className={`relative group rounded-xl border border-white/[0.12] bg-[#0f1724] p-4 overflow-hidden transition-all hover:border-white/[0.2]`}>
       {/* Subtle glow on hover */}
       <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ${glowColor}`} />
 

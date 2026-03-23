@@ -5,6 +5,13 @@ import { TelemetryEvent } from "@/lib/schemas/events";
 import { IncidentAnalysis } from "@/lib/schemas/incident";
 import { ToolCallRecord } from "@/lib/tools/executor";
 import { AgentContribution } from "@/lib/asi/analyze";
+import { DEMO_INCIDENT, DEMO_TOOL_CALLS, DEMO_AGENT_CONTRIBUTIONS } from "@/lib/demo/cached-result";
+
+export interface ChatMessage {
+  role: "user" | "assistant";
+  content: string;
+  timestamp: string;
+}
 
 interface ScenarioInfo {
   id: string;
@@ -35,6 +42,9 @@ export interface SentinelState {
   agentContributions: AgentContribution[];
   reportMarkdown: string | null;
   simulationResults: SimulationResult[];
+  chatMessages: ChatMessage[];
+  isChatLoading: boolean;
+  isDemoMode: boolean;
   error: string | null;
 }
 
@@ -60,6 +70,9 @@ export function useSentinel() {
     agentContributions: [],
     reportMarkdown: null,
     simulationResults: [],
+    chatMessages: [],
+    isChatLoading: false,
+    isDemoMode: false,
     error: null,
   });
 
@@ -227,6 +240,110 @@ export function useSentinel() {
     [state.incident]
   );
 
+  /** Instant demo — loads pre-cached result after a short dramatic animation */
+  const loadDemoResult = useCallback(async () => {
+    // Reset everything and start the rogue-camera scenario
+    if (intervalRef.current) { clearInterval(intervalRef.current); intervalRef.current = null; }
+
+    setState((s) => ({
+      ...s,
+      events: [],
+      incident: null,
+      toolCalls: [],
+      agentContributions: [],
+      reportMarkdown: null,
+      simulationResults: [],
+      chatMessages: [],
+      error: null,
+      activeScenarioId: "scenario-rogue-camera",
+      isSimulating: false,
+      isAnalyzing: true,
+      isDemoMode: true,
+    }));
+
+    // Start the scenario to get events streaming
+    try {
+      await fetch("/api/events", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "start", scenarioId: "scenario-rogue-camera" }),
+      });
+      const allRes = await fetch("/api/events", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "all" }),
+      });
+      const allData = await allRes.json();
+      if (allData.events) {
+        setState((s) => ({ ...s, events: allData.events }));
+      }
+    } catch (_) { /* continue with demo even if events fail */ }
+
+    // Simulate dramatic 3-second analysis
+    await new Promise((r) => setTimeout(r, 3000));
+
+    setState((s) => ({
+      ...s,
+      incident: DEMO_INCIDENT,
+      toolCalls: DEMO_TOOL_CALLS,
+      agentContributions: DEMO_AGENT_CONTRIBUTIONS,
+      isAnalyzing: false,
+    }));
+  }, []);
+
+  /** Ask ASI-1 a natural language question about the active incident */
+  const askCopilot = useCallback(async (question: string) => {
+    if (!state.incident) return;
+
+    const userMsg: ChatMessage = {
+      role: "user",
+      content: question,
+      timestamp: new Date().toISOString(),
+    };
+
+    setState((s) => ({
+      ...s,
+      chatMessages: [...s.chatMessages, userMsg],
+      isChatLoading: true,
+    }));
+
+    try {
+      const res = await fetch("/api/copilot", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          question,
+          incident: state.incident,
+          agentContributions: state.agentContributions,
+        }),
+      });
+
+      if (!res.ok) throw new Error("Copilot request failed");
+      const data = await res.json();
+
+      const assistantMsg: ChatMessage = {
+        role: "assistant",
+        content: data.answer,
+        timestamp: new Date().toISOString(),
+      };
+
+      setState((s) => ({
+        ...s,
+        chatMessages: [...s.chatMessages, assistantMsg],
+        isChatLoading: false,
+      }));
+    } catch (error) {
+      setState((s) => ({
+        ...s,
+        chatMessages: [
+          ...s.chatMessages,
+          { role: "assistant", content: "Unable to connect to ASI-1. Please try again.", timestamp: new Date().toISOString() },
+        ],
+        isChatLoading: false,
+      }));
+    }
+  }, [state.incident, state.agentContributions]);
+
   const generateReport = useCallback(async () => {
     if (!state.incident) return;
 
@@ -278,6 +395,9 @@ export function useSentinel() {
       agentContributions: [],
       reportMarkdown: null,
       simulationResults: [],
+      chatMessages: [],
+      isChatLoading: false,
+      isDemoMode: false,
       error: null,
     });
   }, [state.scenarios, state.assets]);
@@ -291,6 +411,8 @@ export function useSentinel() {
     analyzeEvents,
     runCounterfactual,
     generateReport,
+    loadDemoResult,
+    askCopilot,
     resetAll,
   };
 }

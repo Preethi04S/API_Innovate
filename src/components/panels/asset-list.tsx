@@ -58,7 +58,7 @@ export function AssetList({ assets, affectedAssets = [] }: AssetListProps) {
           {assets.length}
         </Badge>
       </div>
-      <ScrollArea className="flex-1">
+      <ScrollArea className="flex-1 overflow-hidden">
         <div className="p-3 space-y-3">
           {Object.entries(grouped).map(([zone, zoneAssets]) => (
             <div key={zone}>
@@ -73,7 +73,7 @@ export function AssetList({ assets, affectedAssets = [] }: AssetListProps) {
                       key={asset.id}
                       className={`flex items-center gap-2 rounded-md px-2 py-1.5 text-[11px] transition-colors ${
                         isAffected
-                          ? "bg-red-500/8 border border-red-500/15"
+                          ? "bg-red-500/10 border border-red-500/25"
                           : "hover:bg-zinc-800/30"
                       }`}
                     >

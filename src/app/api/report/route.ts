@@ -68,19 +68,21 @@ function generateMarkdownReport(data: ReportRequest): string {
     "",
   ];
 
-  if (incident.alternative_hypotheses.length > 0) {
+  if ((incident.alternative_hypotheses?.length ?? 0) > 0) {
     lines.push("## Alternative Hypotheses", "");
     for (const h of incident.alternative_hypotheses) {
-      lines.push(
-        `### ${h.hypothesis} (${(h.confidence * 100).toFixed(0)}% confidence)`,
-        "",
-        "**Supporting evidence:**",
-        ...h.supporting_evidence.map((e) => `- ${e}`),
-        "",
-        "**Contradicting evidence:**",
-        ...h.contradicting_evidence.map((e) => `- ${e}`),
-        ""
-      );
+      if (typeof h === "string") {
+        lines.push(`- ${h}`, "");
+      } else {
+        const conf = h.confidence != null ? ` (${(h.confidence * 100).toFixed(0)}% confidence)` : "";
+        lines.push(`### ${h.hypothesis ?? "Unknown"}${conf}`, "");
+        if (h.supporting_evidence?.length) {
+          lines.push("**Supporting evidence:**", ...h.supporting_evidence.map((e) => `- ${e}`), "");
+        }
+        if (h.contradicting_evidence?.length) {
+          lines.push("**Contradicting evidence:**", ...h.contradicting_evidence.map((e) => `- ${e}`), "");
+        }
+      }
     }
   }
 

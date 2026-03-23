@@ -1,8 +1,18 @@
 "use client";
 
 import { AgentContribution } from "@/lib/asi/analyze";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Bot, Shield, AlertTriangle, Crown } from "lucide-react";
+
+function stripMd(text: string): string {
+  return text
+    .replace(/#{1,4}\s+/g, "")
+    .replace(/\*\*(.+?)\*\*/gs, "$1")
+    .replace(/\*(.+?)\*/gs, "$1")
+    .replace(/`(.+?)`/g, "$1")
+    .replace(/^[-*]\s+/gm, "• ")
+    .replace(/^\d+\.\s+/gm, "")
+    .trim();
+}
 
 interface AgentPanelProps {
   contributions: AgentContribution[];
@@ -11,20 +21,20 @@ interface AgentPanelProps {
 const AGENT_CONFIG: Record<string, { icon: React.ReactNode; gradient: string; border: string; accent: string }> = {
   cyber_analyst: {
     icon: <Shield className="h-4 w-4" />,
-    gradient: "from-blue-500/8 to-transparent",
-    border: "border-blue-500/15",
+    gradient: "from-blue-500/10 to-transparent",
+    border: "border-blue-500/30",
     accent: "text-blue-400",
   },
   facility_safety: {
     icon: <AlertTriangle className="h-4 w-4" />,
-    gradient: "from-amber-500/8 to-transparent",
-    border: "border-amber-500/15",
+    gradient: "from-amber-500/10 to-transparent",
+    border: "border-amber-500/30",
     accent: "text-amber-400",
   },
   incident_commander: {
     icon: <Crown className="h-4 w-4" />,
-    gradient: "from-emerald-500/8 to-transparent",
-    border: "border-emerald-500/15",
+    gradient: "from-emerald-500/10 to-transparent",
+    border: "border-emerald-500/30",
     accent: "text-emerald-400",
   },
 };
@@ -50,8 +60,8 @@ export function AgentPanel({ contributions }: AgentPanelProps) {
   }
 
   return (
-    <div className="flex flex-col h-full">
-      <ScrollArea className="flex-1">
+    <div className="flex flex-col h-full min-h-0">
+      <div className="flex-1 min-h-0 overflow-y-auto">
         <div className="p-3 space-y-3">
           {contributions.map((agent, i) => {
             const config = AGENT_CONFIG[agent.agent] || {
@@ -76,8 +86,8 @@ export function AgentPanel({ contributions }: AgentPanelProps) {
                   </div>
                 </div>
 
-                <div className="text-[11px] text-zinc-400 leading-relaxed mb-3 max-h-36 overflow-y-auto">
-                  {agent.analysis.slice(0, 600)}
+                <div className="text-[11px] text-zinc-400 leading-relaxed mb-3">
+                  {stripMd(agent.analysis).slice(0, 600)}
                   {agent.analysis.length > 600 && (
                     <span className="text-zinc-600">...</span>
                   )}
@@ -92,7 +102,7 @@ export function AgentPanel({ contributions }: AgentPanelProps) {
                       {agent.recommendations.slice(0, 4).map((rec, j) => (
                         <li key={j} className="text-[11px] text-zinc-300 flex items-start gap-1.5">
                           <span className={`mt-1 h-1 w-1 rounded-full shrink-0 ${config.accent.replace("text-", "bg-")}`} />
-                          {rec}
+                          {stripMd(rec)}
                         </li>
                       ))}
                     </ul>
@@ -102,7 +112,7 @@ export function AgentPanel({ contributions }: AgentPanelProps) {
             );
           })}
         </div>
-      </ScrollArea>
+      </div>
     </div>
   );
 }

@@ -12,17 +12,17 @@ const URGENCY_CONFIG: Record<string, { icon: React.ReactNode; color: string; bg:
   immediate: {
     icon: <AlertTriangle className="h-3.5 w-3.5" />,
     color: "text-red-400",
-    bg: "bg-red-500/5 border-red-500/15",
+    bg: "bg-red-500/10 border-red-500/30",
   },
   short_term: {
     icon: <Clock className="h-3.5 w-3.5" />,
     color: "text-amber-400",
-    bg: "bg-amber-500/5 border-amber-500/15",
+    bg: "bg-amber-500/10 border-amber-500/30",
   },
   scheduled: {
     icon: <CalendarClock className="h-3.5 w-3.5" />,
     color: "text-blue-400",
-    bg: "bg-blue-500/5 border-blue-500/15",
+    bg: "bg-blue-500/10 border-blue-500/30",
   },
 };
 

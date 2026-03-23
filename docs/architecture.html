@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SentinelMesh — Architecture</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #060a14;
+    color: #e2e8f0;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+  }
+
+  /* ── TOP BAR ── */
+  .topbar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 24px;
+    background: rgba(12,18,32,0.95);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    backdrop-filter: blur(12px);
+  }
+  .topbar-logo { display: flex; align-items: center; gap: 10px; }
+  .topbar-logo .shield {
+    width: 32px; height: 32px;
+    background: rgba(16,185,129,0.1);
+    border: 1px solid rgba(16,185,129,0.3);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+  .topbar-logo h1 { font-size: 16px; font-weight: 700; color: #f8fafc; }
+  .topbar-logo span {
+    font-size: 9px; font-weight: 600; letter-spacing: 0.1em;
+    background: rgba(16,185,129,0.15); color: #34d399;
+    border: 1px solid rgba(16,185,129,0.25); border-radius: 4px;
+    padding: 2px 6px; text-transform: uppercase;
+  }
+  .topbar-subtitle { font-size: 11px; color: #64748b; }
+
+  .controls {
+    display: flex; gap: 8px; align-items: center;
+  }
+  .ctrl-btn {
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+    color: #94a3b8; border-radius: 6px; padding: 6px 12px;
+    font-size: 11px; cursor: pointer; transition: all 0.2s;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .ctrl-btn:hover { background: rgba(255,255,255,0.1); color: #e2e8f0; }
+  .zoom-label { font-size: 11px; color: #475569; font-mono: true; min-width: 42px; text-align: center; }
+
+  /* ── CANVAS ── */
+  #canvas-wrap {
+    position: fixed; top: 57px; left: 0; right: 0; bottom: 0;
+    overflow: hidden; cursor: grab;
+  }
+  #canvas-wrap:active { cursor: grabbing; }
+
+  svg { width: 100%; height: 100%; }
+
+  /* ── NODE STYLES ── */
+  .node-card {
+    filter: drop-shadow(0 4px 24px rgba(0,0,0,0.4));
+    transition: filter 0.2s;
+    cursor: pointer;
+  }
+  .node-card:hover { filter: drop-shadow(0 4px 32px rgba(0,0,0,0.6)) brightness(1.15); }
+
+  .node-bg {
+    rx: 12; ry: 12;
+    stroke-width: 1.5;
+  }
+
+  /* Layer labels */
+  .layer-label {
+    font-size: 10px; font-weight: 600; letter-spacing: 0.12em;
+    text-transform: uppercase; fill: #334155; font-family: inherit;
+  }
+
+  /* ── TOOLTIP ── */
+  .tooltip {
+    position: fixed; z-index: 200;
+    background: rgba(15,23,36,0.97);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 10px; padding: 12px 16px;
+    font-size: 12px; color: #e2e8f0;
+    max-width: 280px; pointer-events: none;
+    opacity: 0; transition: opacity 0.15s;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  }
+  .tooltip.show { opacity: 1; }
+  .tooltip h3 { font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+  .tooltip p { font-size: 11px; color: #94a3b8; line-height: 1.5; }
+  .tooltip .tag {
+    display: inline-block; margin-top: 6px; margin-right: 4px;
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 4px; padding: 2px 6px; font-size: 10px; color: #64748b;
+  }
+
+  /* ── LEGEND ── */
+  .legend {
+    position: fixed; bottom: 20px; left: 20px; z-index: 100;
+    background: rgba(12,18,32,0.9); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px; padding: 14px 16px; backdrop-filter: blur(8px);
+    font-size: 11px;
+  }
+  .legend h4 { color: #475569; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 8px; }
+  .legend-item { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; color: #94a3b8; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .legend-line { width: 20px; height: 2px; flex-shrink: 0; }
+
+  /* ── HINT ── */
+  .hint {
+    position: fixed; bottom: 20px; right: 20px; z-index: 100;
+    background: rgba(12,18,32,0.9); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px; padding: 10px 14px; backdrop-filter: blur(8px);
+    font-size: 10px; color: #475569;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .hint span { display: flex; align-items: center; gap: 6px; }
+
+  /* pulse animation */
+  @keyframes pulse-ring {
+    0% { opacity: 0.8; r: 6; }
+    100% { opacity: 0; r: 14; }
+  }
+  .pulse-ring { animation: pulse-ring 2s ease-out infinite; }
+
+  @keyframes flow-dash {
+    from { stroke-dashoffset: 24; }
+    to { stroke-dashoffset: 0; }
+  }
+  .flow-path { animation: flow-dash 1.2s linear infinite; }
+  .flow-path-slow { animation: flow-dash 2.5s linear infinite; }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-logo">
+    <div class="shield">🛡</div>
+    <div>
+      <h1>SentinelMesh <span>Architecture</span></h1>
+    </div>
+  </div>
+  <div class="topbar-subtitle">Cyber-Physical Defense Copilot — Powered by ASI-1 · Multi-Agent AI Pipeline</div>
+  <div class="controls">
+    <button class="ctrl-btn" onclick="resetView()">⊙ Reset View</button>
+    <button class="ctrl-btn" onclick="zoomOut()">－</button>
+    <span class="zoom-label" id="zoom-label">100%</span>
+    <button class="ctrl-btn" onclick="zoomIn()">＋</button>
+    <button class="ctrl-btn" onclick="toggleFlow()">⚡ Flow</button>
+  </div>
+</div>
+
+<!-- TOOLTIP -->
+<div class="tooltip" id="tooltip">
+  <h3 id="tt-title"></h3>
+  <p id="tt-desc"></p>
+  <div id="tt-tags"></div>
+</div>
+
+<!-- CANVAS -->
+<div id="canvas-wrap">
+<svg id="svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <!-- Glows -->
+    <filter id="glow-blue"><feGaussianBlur stdDeviation="4" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="glow-emerald"><feGaussianBlur stdDeviation="5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="glow-violet"><feGaussianBlur stdDeviation="4" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="glow-red"><feGaussianBlur stdDeviation="4" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+
+    <!-- Gradients -->
+    <linearGradient id="grad-source" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1e3a5f" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#0f1f38" stop-opacity="0.9"/>
+    </linearGradient>
+    <linearGradient id="grad-event" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1a3a2a" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#0d1f16" stop-opacity="0.95"/>
+    </linearGradient>
+    <linearGradient id="grad-agent" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2d1b4e" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#180d2e" stop-opacity="0.95"/>
+    </linearGradient>
+    <linearGradient id="grad-asi" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#0e2a3f"/>
+      <stop offset="100%" stop-color="#1a0e3f"/>
+    </linearGradient>
+    <linearGradient id="grad-tool" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3a2208" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#1f1204" stop-opacity="0.9"/>
+    </linearGradient>
+    <linearGradient id="grad-output" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1f0e0e" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#120808" stop-opacity="0.95"/>
+    </linearGradient>
+
+    <!-- Arrow markers -->
+    <marker id="arrow-blue" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#3b82f6" opacity="0.7"/>
+    </marker>
+    <marker id="arrow-emerald" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#10b981" opacity="0.7"/>
+    </marker>
+    <marker id="arrow-violet" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#8b5cf6" opacity="0.7"/>
+    </marker>
+    <marker id="arrow-amber" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#f59e0b" opacity="0.7"/>
+    </marker>
+    <marker id="arrow-red" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#ef4444" opacity="0.7"/>
+    </marker>
+  </defs>
+
+  <!-- ═══════════════════════════════════════════
+       BACKGROUND LAYER BANDS
+  ═══════════════════════════════════════════ -->
+  <rect x="0" y="0" width="1600" height="1000" fill="#060a14"/>
+
+  <!-- Grid dots -->
+  <pattern id="grid" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+    <circle cx="1" cy="1" r="0.8" fill="rgba(255,255,255,0.04)"/>
+  </pattern>
+  <rect width="1600" height="1000" fill="url(#grid)"/>
+
+  <!-- Layer bands -->
+  <rect x="30" y="55" width="1540" height="155" rx="12" fill="rgba(59,130,246,0.03)" stroke="rgba(59,130,246,0.08)" stroke-width="1"/>
+  <rect x="30" y="230" width="1540" height="130" rx="12" fill="rgba(16,185,129,0.03)" stroke="rgba(16,185,129,0.08)" stroke-width="1"/>
+  <rect x="30" y="380" width="1540" height="200" rx="12" fill="rgba(139,92,246,0.04)" stroke="rgba(139,92,246,0.1)" stroke-width="1"/>
+  <rect x="30" y="600" width="1540" height="145" rx="12" fill="rgba(245,158,11,0.03)" stroke="rgba(245,158,11,0.08)" stroke-width="1"/>
+  <rect x="30" y="765" width="1540" height="210" rx="12" fill="rgba(239,68,68,0.03)" stroke="rgba(239,68,68,0.08)" stroke-width="1"/>
+
+  <!-- Layer labels -->
+  <text x="50" y="80" class="layer-label">① Data Sources — Cyber-Physical Sensors</text>
+  <text x="50" y="252" class="layer-label">② Event Processing — Telemetry Ingestion</text>
+  <text x="50" y="403" class="layer-label">③ ASI-1 Multi-Agent Orchestration</text>
+  <text x="50" y="622" class="layer-label">④ Security Tool Execution Layer</text>
+  <text x="50" y="788" class="layer-label">⑤ Intelligence Output</text>
+
+  <!-- ═══════════════════════════════════════════
+       LAYER 1 — DATA SOURCES (y=90)
+  ═══════════════════════════════════════════ -->
+
+  <!-- IoT Camera -->
+  <g class="node-card" data-title="IoT Camera Sensors" data-desc="IP cameras (cam-l1-01, cam-l2-01) monitoring facility zones. Detects motion, USB insertions, offline events, and firmware anomalies. Primary targets in cyber-physical attacks." data-tags="CVE-2024-3721,ONVIF,RTSP">
+    <rect x="95" y="95" width="155" height="90" rx="10" fill="url(#grad-source)" stroke="rgba(59,130,246,0.4)" stroke-width="1.5"/>
+    <text x="172" y="130" text-anchor="middle" font-size="22" dy="0">📷</text>
+    <text x="172" y="155" text-anchor="middle" font-size="11" font-weight="600" fill="#93c5fd" font-family="inherit">IoT Cameras</text>
+    <text x="172" y="170" text-anchor="middle" font-size="9" fill="#475569" font-family="inherit">cam-l1-01 · cam-l2-01</text>
+    <!-- pulse -->
+    <circle cx="232" cy="104" r="5" fill="#3b82f6" opacity="0.9"/>
+    <circle class="pulse-ring" cx="232" cy="104" fill="none" stroke="#3b82f6" stroke-width="1.5"/>
+  </g>
+
+  <!-- Motion Sensors -->
+  <g class="node-card" data-title="Motion & Presence Sensors" data-desc="PIR motion detectors covering server rooms, labs, and entry points. Provides physical presence confirmation — critical for correlating cyber events with physical intrusion." data-tags="PIR,Zone-Mapping,Physical-Intel">
+    <rect x="310" y="95" width="155" height="90" rx="10" fill="url(#grad-source)" stroke="rgba(59,130,246,0.4)" stroke-width="1.5"/>
+    <text x="387" y="130" text-anchor="middle" font-size="22">🚶</text>
+    <text x="387" y="155" text-anchor="middle" font-size="11" font-weight="600" fill="#93c5fd" font-family="inherit">Motion Sensors</text>
+    <text x="387" y="170" text-anchor="middle" font-size="9" fill="#475569" font-family="inherit">Zone coverage · PIR</text>
+  </g>
+
+  <!-- Access Control -->
+  <g class="node-card" data-title="Badge & Access Control" data-desc="RFID/NFC badge readers on all restricted zones. Monitors access attempts, failed authentications, and tailgating. Key evidence source for insider threat detection." data-tags="RFID,Badge-Audit,Access-Log">
+    <rect x="525" y="95" width="155" height="90" rx="10" fill="url(#grad-source)" stroke="rgba(59,130,246,0.4)" stroke-width="1.5"/>
+    <text x="602" y="130" text-anchor="middle" font-size="22">🔐</text>
+    <text x="602" y="155" text-anchor="middle" font-size="11" font-weight="600" fill="#93c5fd" font-family="inherit">Access Control</text>
+    <text x="602" y="170" text-anchor="middle" font-size="9" fill="#475569" font-family="inherit">Badge · RFID · Zones</text>
+  </g>
+
+  <!-- Network Monitor -->
+  <g class="node-card" data-title="Network Traffic Monitor" data-desc="Deep packet inspection on all network segments. Detects unknown devices (MAC anomalies), bandwidth spikes, data exfiltration, and lateral movement indicators." data-tags="DPI,IDS,MAC-Tracking,NetFlow">
+    <rect x="740" y="95" width="155" height="90" rx="10" fill="url(#grad-source)" stroke="rgba(59,130,246,0.4)" stroke-width="1.5"/>
+    <text x="817" y="130" text-anchor="middle" font-size="22">🌐</text>
+    <text x="817" y="155" text-anchor="middle" font-size="11" font-weight="600" fill="#93c5fd" font-family="inherit">Network Monitor</text>
+    <text x="817" y="170" text-anchor="middle" font-size="9" fill="#475569" font-family="inherit">DPI · MAC · NetFlow</text>
+  </g>
+
+  <!-- HVAC / Environment -->
+  <g class="node-card" data-title="HVAC & Environmental Sensors" data-desc="Temperature, humidity, and smoke sensors for server rooms and cold storage. Monitors environmental hazards and equipment safety alongside cyber threats." data-tags="HVAC,Temp,Humidity,OSHA">
+    <rect x="955" y="95" width="155" height="90" rx="10" fill="url(#grad-source)" stroke="rgba(59,130,246,0.4)" stroke-width="1.5"/>
+    <text x="1032" y="130" text-anchor="middle" font-size="22">🌡️</text>
+    <text x="1032" y="155" text-anchor="middle" font-size="11" font-weight="600" fill="#93c5fd" font-family="inherit">HVAC / Env</text>
+    <text x="1032" y="170" text-anchor="middle" font-size="9" fill="#475569" font-family="inherit">Temp · Humidity · Smoke</text>
+  </g>
+
+  <!-- Smart Locks -->
+  <g class="node-card" data-title="Smart Lock & Physical Security" data-desc="Electronic locks on server rooms, labs, and restricted areas. Monitors lock status, forced entry, and anomalous access patterns during off-hours." data-tags="BLE,Zigbee,Smart-Lock">
+    <rect x="1170" y="95" width="155" height="90" rx="10" fill="url(#grad-source)" stroke="rgba(59,130,246,0.4)" stroke-width="1.5"/>
+    <text x="1247" y="130" text-anchor="middle" font-size="22">🔒</text>
+    <text x="1247" y="155" text-anchor="middle" font-size="11" font-weight="600" fill="#93c5fd" font-family="inherit">Smart Locks</text>
+    <text x="1247" y="170" text-anchor="middle" font-size="9" fill="#475569" font-family="inherit">BLE · Zigbee · Entry</text>
+  </g>
+
+  <!-- External Threat Intel -->
+  <g class="node-card" data-title="Threat Intelligence Feed" data-desc="External IP reputation, CVE database, and known APT indicators. Enriches local telemetry with global threat context for better attribution and severity scoring." data-tags="CVE,APT,MITRE,ThreatIntel">
+    <rect x="1385" y="95" width="155" height="90" rx="10" fill="url(#grad-source)" stroke="rgba(59,130,246,0.4)" stroke-width="1.5"/>
+    <text x="1462" y="130" text-anchor="middle" font-size="22">🛰️</text>
+    <text x="1462" y="155" text-anchor="middle" font-size="11" font-weight="600" fill="#93c5fd" font-family="inherit">Threat Intel</text>
+    <text x="1462" y="170" text-anchor="middle" font-size="9" fill="#475569" font-family="inherit">CVE · APT · MITRE</text>
+  </g>
+
+  <!-- ═══════════════════════════════════════════
+       CONNECTIONS: Sources → Event Stream
+  ═══════════════════════════════════════════ -->
+  <g class="flow-paths" opacity="0.7">
+    <line x1="172" y1="185" x2="172" y2="240" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="4,4" class="flow-path" marker-end="url(#arrow-blue)"/>
+    <line x1="387" y1="185" x2="387" y2="240" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="4,4" class="flow-path" marker-end="url(#arrow-blue)"/>
+    <line x1="602" y1="185" x2="602" y2="240" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="4,4" class="flow-path" marker-end="url(#arrow-blue)"/>
+    <line x1="817" y1="185" x2="817" y2="240" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="4,4" class="flow-path" marker-end="url(#arrow-blue)"/>
+    <line x1="1032" y1="185" x2="1032" y2="240" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="4,4" class="flow-path" marker-end="url(#arrow-blue)"/>
+    <line x1="1247" y1="185" x2="1247" y2="240" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="4,4" class="flow-path" marker-end="url(#arrow-blue)"/>
+    <line x1="1462" y1="185" x2="1462" y2="240" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="4,4" class="flow-path" marker-end="url(#arrow-blue)"/>
+  </g>
+
+  <!-- ═══════════════════════════════════════════
+       LAYER 2 — EVENT PROCESSING (y=245)
+  ═══════════════════════════════════════════ -->
+
+  <!-- Event Stream Bus -->
+  <g class="node-card" data-title="Telemetry Event Stream" data-desc="Real-time ingestion pipeline collecting all sensor events. Normalizes heterogeneous data into TelemetryEvent schema with timestamps, zones, and device IDs. Buffers events for batch or real-time analysis." data-tags="Event-Bus,Normalization,Batching,Schema">
+    <rect x="370" y="245" width="860" height="100" rx="12" fill="url(#grad-event)" stroke="rgba(16,185,129,0.45)" stroke-width="1.5" filter="url(#glow-emerald)"/>
+    <text x="800" y="285" text-anchor="middle" font-size="14" font-weight="700" fill="#6ee7b7" font-family="inherit">📡  Telemetry Event Stream</text>
+    <text x="800" y="308" text-anchor="middle" font-size="10" fill="#475569" font-family="inherit">Real-time ingestion · Schema normalization · Zone mapping · Timestamp correlation</text>
+    <!-- event type pills -->
+    <rect x="440" y="318" width="90" height="18" rx="4" fill="rgba(16,185,129,0.1)" stroke="rgba(16,185,129,0.2)" stroke-width="1"/>
+    <text x="485" y="331" text-anchor="middle" font-size="9" fill="#6ee7b7" font-family="inherit">unknown_device</text>
+    <rect x="545" y="318" width="80" height="18" rx="4" fill="rgba(16,185,129,0.1)" stroke="rgba(16,185,129,0.2)" stroke-width="1"/>
+    <text x="585" y="331" text-anchor="middle" font-size="9" fill="#6ee7b7" font-family="inherit">data_transfer</text>
+    <rect x="640" y="318" width="80" height="18" rx="4" fill="rgba(16,185,129,0.1)" stroke="rgba(16,185,129,0.2)" stroke-width="1"/>
+    <text x="680" y="331" text-anchor="middle" font-size="9" fill="#6ee7b7" font-family="inherit">failed_login</text>
+    <rect x="735" y="318" width="80" height="18" rx="4" fill="rgba(16,185,129,0.1)" stroke="rgba(16,185,129,0.2)" stroke-width="1"/>
+    <text x="775" y="331" text-anchor="middle" font-size="9" fill="#6ee7b7" font-family="inherit">usb_inserted</text>
+    <rect x="830" y="318" width="85" height="18" rx="4" fill="rgba(16,185,129,0.1)" stroke="rgba(16,185,129,0.2)" stroke-width="1"/>
+    <text x="872" y="331" text-anchor="middle" font-size="9" fill="#6ee7b7" font-family="inherit">network_spike</text>
+    <rect x="930" y="318" width="100" height="18" rx="4" fill="rgba(16,185,129,0.1)" stroke="rgba(16,185,129,0.2)" stroke-width="1"/>
+    <text x="980" y="331" text-anchor="middle" font-size="9" fill="#6ee7b7" font-family="inherit">motion_detected</text>
+    <!-- event count badge -->
+    <circle cx="1200" cy="295" r="22" fill="rgba(16,185,129,0.15)" stroke="rgba(16,185,129,0.3)" stroke-width="1.5"/>
+    <text x="1200" y="291" text-anchor="middle" font-size="14" font-weight="700" fill="#6ee7b7" font-family="inherit">7+</text>
+    <text x="1200" y="305" text-anchor="middle" font-size="8" fill="#6ee7b7" font-family="inherit">Events</text>
+  </g>
+
+  <!-- Connection: Event stream → ASI-1 -->
+  <line x1="800" y1="345" x2="800" y2="390" stroke="#8b5cf6" stroke-width="2" stroke-dasharray="5,4" class="flow-path" marker-end="url(#arrow-violet)"/>
+
+  <!-- ═══════════════════════════════════════════
+       LAYER 3 — ASI-1 MULTI-AGENT (y=395)
+  ═══════════════════════════════════════════ -->
+
+  <!-- ASI-1 Core -->
+  <g class="node-card" data-title="ASI-1 Reasoning Engine" data-desc="Superintelligent AI model from ASI-1.ai. Acts as the orchestrator for all specialist agents. Uses prompt-injection tool pre-execution workaround (no native tool-calling required). Model: asi1-mini." data-tags="ASI-1,LLM,Orchestrator,asi1-mini">
+    <rect x="600" y="395" width="400" height="75" rx="12" fill="url(#grad-asi)" stroke="rgba(139,92,246,0.6)" stroke-width="2" filter="url(#glow-violet)"/>
+    <text x="800" y="430" text-anchor="middle" font-size="15" font-weight="700" fill="#c4b5fd" font-family="inherit">🤖  ASI-1 Reasoning Engine</text>
+    <text x="800" y="452" text-anchor="middle" font-size="10" fill="#6b7280" font-family="inherit">Multi-agent orchestration · Parallel inference · Context injection · asi1-mini</text>
+    <!-- glow pulse rings -->
+    <circle cx="800" cy="432" r="40" fill="none" stroke="rgba(139,92,246,0.1)" stroke-width="20"/>
+  </g>
+
+  <!-- Fan out to agents -->
+  <line x1="700" y1="470" x2="430" y2="510" stroke="#8b5cf6" stroke-width="1.5" stroke-dasharray="4,3" class="flow-path" marker-end="url(#arrow-violet)"/>
+  <line x1="800" y1="470" x2="800" y2="510" stroke="#8b5cf6" stroke-width="1.5" stroke-dasharray="4,3" class="flow-path" marker-end="url(#arrow-violet)"/>
+  <line x1="900" y1="470" x2="1170" y2="510" stroke="#8b5cf6" stroke-width="1.5" stroke-dasharray="4,3" class="flow-path" marker-end="url(#arrow-violet)"/>
+
+  <!-- Agent: Cyber Analyst -->
+  <g class="node-card" data-title="Cyber Analyst Agent" data-desc="Specialist agent focused on network security, data exfiltration detection, and digital forensics. Analyzes MAC anomalies, credential attacks, C2 communication patterns, and lateral movement indicators." data-tags="Network-Forensics,DLP,EDR,SIEM">
+    <rect x="270" y="515" width="320" height="95" rx="10" fill="rgba(30,58,138,0.4)" stroke="rgba(59,130,246,0.5)" stroke-width="1.5"/>
+    <text x="430" y="546" text-anchor="middle" font-size="13" font-weight="600" fill="#93c5fd" font-family="inherit">🔵  Cyber Analyst</text>
+    <text x="430" y="563" text-anchor="middle" font-size="9" fill="#475569" font-family="inherit">Network anomalies · Data exfiltration</text>
+    <text x="430" y="577" text-anchor="middle" font-size="9" fill="#475569" font-family="inherit">Credential attacks · C2 detection</text>
+    <text x="430" y="595" text-anchor="middle" font-size="9" fill="#1d4ed8" font-family="inherit">AGENT</text>
+    <rect x="380" y="587" width="100" height="14" rx="3" fill="rgba(59,130,246,0.1)" stroke="rgba(59,130,246,0.2)" stroke-width="1"/>
+    <text x="430" y="598" text-anchor="middle" font-size="9" fill="#93c5fd" font-family="inherit">PARALLEL EXECUTION</text>
+  </g>
+
+  <!-- Agent: Facility Safety -->
+  <g class="node-card" data-title="Facility Safety Agent" data-desc="Specialist agent focused on physical security, environmental monitoring, and occupant safety. Analyzes badge anomalies, physical presence, HVAC hazards, and regulatory compliance (OSHA, NFPA)." data-tags="Physical-Security,OSHA,NFPA,Biosafety">
+    <rect x="640" y="515" width="320" height="95" rx="10" fill="rgba(78,45,8,0.5)" stroke="rgba(245,158,11,0.5)" stroke-width="1.5"/>
+    <text x="800" y="546" text-anchor="middle" font-size="13" font-weight="600" fill="#fcd34d" font-family="inherit">🟡  Facility Safety</text>
+    <text x="800" y="563" text-anchor="middle" font-size="9" fill="#475569" font-family="inherit">Physical access · Badge audit</text>
+    <text x="800" y="577" text-anchor="middle" font-size="9" fill="#475569" font-family="inherit">Environmental hazards · OSHA</text>
+    <rect x="750" y="587" width="100" height="14" rx="3" fill="rgba(245,158,11,0.1)" stroke="rgba(245,158,11,0.2)" stroke-width="1"/>
+    <text x="800" y="598" text-anchor="middle" font-size="9" fill="#fcd34d" font-family="inherit">PARALLEL EXECUTION</text>
+  </g>
+
+  <!-- Agent: Incident Commander -->
+  <g class="node-card" data-title="Incident Commander Agent" data-desc="Senior synthesis agent that fuses findings from all specialist agents. Produces executive-level incident assessment, priority sequencing, business impact analysis, and regulatory notification guidance." data-tags="IR-Plan,Executive-Brief,Risk-Matrix,P0">
+    <rect x="1010" y="515" width="320" height="95" rx="10" fill="rgba(6,46,26,0.5)" stroke="rgba(16,185,129,0.5)" stroke-width="1.5"/>
+    <text x="1170" y="546" text-anchor="middle" font-size="13" font-weight="600" fill="#6ee7b7" font-family="inherit">🟢  Incident Commander</text>
+    <text x="1170" y="563" text-anchor="middle" font-size="9" fill="#475569" font-family="inherit">Cross-agent synthesis · IR plan</text>
+    <text x="1170" y="577" text-anchor="middle" font-size="9" fill="#475569" font-family="inherit">Executive brief · Risk matrix</text>
+    <rect x="1120" y="587" width="100" height="14" rx="3" fill="rgba(16,185,129,0.1)" stroke="rgba(16,185,129,0.2)" stroke-width="1"/>
+    <text x="1170" y="598" text-anchor="middle" font-size="9" fill="#6ee7b7" font-family="inherit">SYNTHESIS STAGE</text>
+  </g>
+
+  <!-- Agents → Tool Layer -->
+  <line x1="430" y1="610" x2="430" y2="615" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="3,3" class="flow-path-slow" marker-end="url(#arrow-amber)"/>
+  <line x1="800" y1="610" x2="800" y2="615" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="3,3" class="flow-path-slow" marker-end="url(#arrow-amber)"/>
+  <line x1="1170" y1="610" x2="1170" y2="615" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="3,3" class="flow-path-slow" marker-end="url(#arrow-amber)"/>
+
+  <!-- ═══════════════════════════════════════════
+       LAYER 4 — TOOL EXECUTION (y=620)
+  ═══════════════════════════════════════════ -->
+
+  <!-- Tool 1 -->
+  <g class="node-card" data-title="lookup_playbook" data-desc="Retrieves the appropriate incident response playbook based on incident type and severity. Returns step-by-step containment procedures and escalation SLAs." data-tags="IR-Playbook,NIST,CISA">
+    <rect x="65" y="625" width="175" height="100" rx="10" fill="url(#grad-tool)" stroke="rgba(245,158,11,0.4)" stroke-width="1.5"/>
+    <text x="152" y="662" text-anchor="middle" font-size="18">📋</text>
+    <text x="152" y="682" text-anchor="middle" font-size="10" font-weight="600" fill="#fcd34d" font-family="inherit">lookup_playbook</text>
+    <text x="152" y="698" text-anchor="middle" font-size="9" fill="#475569" font-family="inherit">IR procedures · SLA</text>
+    <text x="152" y="712" text-anchor="middle" font-size="9" fill="#475569" font-family="inherit">Containment steps</text>
+  </g>
+
+  <!-- Tool 2 -->
+  <g class="node-card" data-title="query_asset_inventory" data-desc="Queries the asset management database for device details including firmware versions, criticality, zone location, and existing CVE exposure. Returns enriched asset profiles." data-tags="CMDB,Asset-Mgmt,Firmware">
+    <rect x="282" y="625" width="175" height="100" rx="10" fill="url(#grad-tool)" stroke="rgba(245,158,11,0.4)" stroke-width="1.5"/>
+    <text x="369" y="662" text-anchor="middle" font-size="18">🗃️</text>
+    <text x="369" y="682" text-anchor="middle" font-size="10" font-weight="600" fill="#fcd34d" font-family="inherit">query_asset_inventory</text>
+    <text x="369" y="698" text-anchor="middle" font-size="9" fill="#475569" font-family="inherit">CMDB · Firmware</text>
+    <text x="369" y="712" text-anchor="middle" font-size="9" fill="#475569" font-family="inherit">CVE exposure · Zones</text>
+  </g>
+
+  <!-- Tool 3 -->
+  <g class="node-card" data-title="check_known_vulns" data-desc="Scans asset firmware versions against the CVE database. Returns matching vulnerabilities with CVSS scores, exploit availability, and patch versions. CVE-2024-3721 (CVSS 9.1) was detected in this incident." data-tags="CVE,CVSS,NVD,NIST">
+    <rect x="499" y="625" width="175" height="100" rx="10" fill="url(#grad-tool)" stroke="rgba(245,158,11,0.4)" stroke-width="1.5"/>
+    <text x="586" y="662" text-anchor="middle" font-size="18">🔍</text>
+    <text x="586" y="682" text-anchor="middle" font-size="10" font-weight="600" fill="#fcd34d" font-family="inherit">check_known_vulns</text>
+    <text x="586" y="698" text-anchor="middle" font-size="9" fill="#475569" font-family="inherit">CVE-2024-3721</text>
+    <text x="586" y="712" text-anchor="middle" font-size="9" fill="#475569" font-family="inherit">CVSS 9.1 · Patch avail.</text>
+  </g>
+
+  <!-- Tool 4 -->
+  <g class="node-card" data-title="draft_alert_message" data-desc="Auto-generates stakeholder alert messages tailored to audience and severity. Produces CISO alerts, facility notifications, and executive briefings with appropriate technical detail levels." data-tags="Comms,Stakeholder,CISO,Notification">
+    <rect x="716" y="625" width="175" height="100" rx="10" fill="url(#grad-tool)" stroke="rgba(245,158,11,0.4)" stroke-width="1.5"/>
+    <text x="803" y="662" text-anchor="middle" font-size="18">📨</text>
+    <text x="803" y="682" text-anchor="middle" font-size="10" font-weight="600" fill="#fcd34d" font-family="inherit">draft_alert_message</text>
+    <text x="803" y="698" text-anchor="middle" font-size="9" fill="#475569" font-family="inherit">CISO · Exec · Ops</text>
+    <text x="803" y="712" text-anchor="middle" font-size="9" fill="#475569" font-family="inherit">Severity-calibrated</text>
+  </g>
+
+  <!-- Tool 5 -->
+  <g class="node-card" data-title="simulate_containment_action" data-desc="Simulates the projected outcome of a containment action before execution. Returns risk delta (before/after), side effects, timeline, and recommended strategy. Powers the What-If Simulator." data-tags="What-If,Risk-Delta,Simulation,Counterfactual">
+    <rect x="933" y="625" width="175" height="100" rx="10" fill="url(#grad-tool)" stroke="rgba(245,158,11,0.4)" stroke-width="1.5"/>
+    <text x="1020" y="662" text-anchor="middle" font-size="18">⚗️</text>
+    <text x="1020" y="682" text-anchor="middle" font-size="10" font-weight="600" fill="#fcd34d" font-family="inherit">simulate_containment</text>
+    <text x="1020" y="698" text-anchor="middle" font-size="9" fill="#475569" font-family="inherit">Risk delta · What-If</text>
+    <text x="1020" y="712" text-anchor="middle" font-size="9" fill="#475569" font-family="inherit">Counterfactual analysis</text>
+  </g>
+
+  <!-- Tool 6: Context Injection -->
+  <g class="node-card" data-title="Prompt-Injection Tool Workaround" data-desc="ASI-1 does not support native tool-calling (tools param → 422 error). SentinelMesh pre-executes all 5 tools deterministically, then injects results as structured context into the final ASI-1 prompt. Fully functional without native tool support." data-tags="Workaround,Prompt-Eng,Context-Injection,ASI-1">
+    <rect x="1150" y="625" width="175" height="100" rx="10" fill="rgba(20,10,40,0.8)" stroke="rgba(139,92,246,0.5)" stroke-width="1.5" stroke-dasharray="5,3"/>
+    <text x="1237" y="662" text-anchor="middle" font-size="18">🔧</text>
+    <text x="1237" y="682" text-anchor="middle" font-size="10" font-weight="600" fill="#c4b5fd" font-family="inherit">Context Injection</text>
+    <text x="1237" y="698" text-anchor="middle" font-size="9" fill="#475569" font-family="inherit">Pre-exec workaround</text>
+    <text x="1237" y="712" text-anchor="middle" font-size="9" fill="#8b5cf6" font-family="inherit">ASI-1 compatible ✓</text>
+  </g>
+
+  <!-- Tools → Output -->
+  <line x1="152" y1="725" x2="270" y2="780" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="4,3" class="flow-path-slow" marker-end="url(#arrow-red)"/>
+  <line x1="369" y1="725" x2="430" y2="780" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="4,3" class="flow-path-slow" marker-end="url(#arrow-red)"/>
+  <line x1="586" y1="725" x2="620" y2="780" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="4,3" class="flow-path-slow" marker-end="url(#arrow-red)"/>
+  <line x1="803" y1="725" x2="800" y2="780" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="4,3" class="flow-path-slow" marker-end="url(#arrow-red)"/>
+  <line x1="1020" y1="725" x2="1000" y2="780" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="4,3" class="flow-path-slow" marker-end="url(#arrow-red)"/>
+  <line x1="1237" y1="725" x2="1280" y2="780" stroke="#8b5cf6" stroke-width="1.5" stroke-dasharray="4,3" class="flow-path-slow" marker-end="url(#arrow-violet)"/>
+
+  <!-- ═══════════════════════════════════════════
+       LAYER 5 — OUTPUT (y=780)
+  ═══════════════════════════════════════════ -->
+
+  <!-- Incident Analysis -->
+  <g class="node-card" data-title="Incident Analysis (96% Confidence)" data-desc="Structured JSON incident report with severity, category, title, summary, root cause, evidence chain, affected assets, confidence score, immediate actions, escalation path, and alternative hypotheses." data-tags="CRITICAL,96%,Multi-Vector,JSON">
+    <rect x="65" y="780" width="205" height="170" rx="10" fill="url(#grad-output)" stroke="rgba(239,68,68,0.5)" stroke-width="2" filter="url(#glow-red)"/>
+    <text x="167" y="815" text-anchor="middle" font-size="18">🚨</text>
+    <text x="167" y="838" text-anchor="middle" font-size="11" font-weight="700" fill="#fca5a5" font-family="inherit">Incident Analysis</text>
+    <text x="167" y="855" text-anchor="middle" font-size="9" fill="#475569" font-family="inherit">96% confidence</text>
+    <text x="167" y="870" text-anchor="middle" font-size="9" fill="#475569" font-family="inherit">Severity · Evidence</text>
+    <text x="167" y="885" text-anchor="middle" font-size="9" fill="#475569" font-family="inherit">Root cause · Actions</text>
+    <!-- confidence ring -->
+    <circle cx="167" cy="915" r="18" fill="none" stroke="rgba(239,68,68,0.2)" stroke-width="4"/>
+    <circle cx="167" cy="915" r="18" fill="none" stroke="#ef4444" stroke-width="4" stroke-dasharray="108 113" stroke-linecap="round" transform="rotate(-90 167 915)"/>
+    <text x="167" y="919" text-anchor="middle" font-size="9" font-weight="700" fill="#fca5a5" font-family="inherit">96%</text>
+    <circle class="pulse-ring" cx="65" cy="789" fill="none" stroke="#ef4444" stroke-width="1.5"/>
+    <circle cx="65" cy="789" r="5" fill="#ef4444"/>
+  </g>
+
+  <!-- Kill Chain -->
+  <g class="node-card" data-title="MITRE ATT&CK Kill Chain" data-desc="Visual kill chain mapping detected events to MITRE ATT&CK tactics: Reconnaissance → Initial Access → Execution → Persistence → Exfiltration. Each stage lights up based on detected event types." data-tags="MITRE,ATT&CK,Kill-Chain,TA0001">
+    <rect x="305" y="780" width="205" height="170" rx="10" fill="url(#grad-output)" stroke="rgba(239,68,68,0.4)" stroke-width="1.5"/>
+    <text x="407" y="815" text-anchor="middle" font-size="18">⛓️</text>
+    <text x="407" y="838" text-anchor="middle" font-size="11" font-weight="700" fill="#fca5a5" font-family="inherit">Kill Chain Viz</text>
+    <text x="407" y="857" text-anchor="middle" font-size="9" fill="#6ee7b7" font-family="inherit">🔍 Recon</text>
+    <text x="407" y="873" text-anchor="middle" font-size="9" fill="#f87171" font-family="inherit">🔓 Initial Access ●</text>
+    <text x="407" y="889" text-anchor="middle" font-size="9" fill="#fb923c" font-family="inherit">⚙️ Execution ●</text>
+    <text x="407" y="905" text-anchor="middle" font-size="9" fill="#facc15" font-family="inherit">🔧 Persistence ●</text>
+    <text x="407" y="921" text-anchor="middle" font-size="9" fill="#f87171" font-family="inherit">📤 Exfiltration ●</text>
+    <text x="407" y="937" text-anchor="middle" font-size="9" fill="#374151" font-family="inherit">MITRE ATT&CK</text>
+  </g>
+
+  <!-- What-If Simulator -->
+  <g class="node-card" data-title="What-If Counterfactual Simulator" data-desc="Simulates 4 containment strategies in real-time: isolate_device, revoke_badge, delay_containment, ignore_event. Returns risk delta (before/after%), projected consequences, and ASI-1 recommendations." data-tags="Counterfactual,Risk-Delta,Simulation,Strategy">
+    <rect x="545" y="780" width="205" height="170" rx="10" fill="url(#grad-output)" stroke="rgba(239,68,68,0.4)" stroke-width="1.5"/>
+    <text x="647" y="815" text-anchor="middle" font-size="18">⚗️</text>
+    <text x="647" y="838" text-anchor="middle" font-size="11" font-weight="700" fill="#fca5a5" font-family="inherit">What-If Simulator</text>
+    <text x="647" y="857" text-anchor="middle" font-size="9" fill="#475569" font-family="inherit">isolate_device → -72%</text>
+    <text x="647" y="873" text-anchor="middle" font-size="9" fill="#475569" font-family="inherit">revoke_badge → -45%</text>
+    <text x="647" y="889" text-anchor="middle" font-size="9" fill="#475569" font-family="inherit">delay_containment → +2%</text>
+    <text x="647" y="905" text-anchor="middle" font-size="9" fill="#475569" font-family="inherit">ignore_event → +18%</text>
+    <rect x="580" y="920" width="135" height="16" rx="3" fill="rgba(139,92,246,0.15)" stroke="rgba(139,92,246,0.3)" stroke-width="1"/>
+    <text x="647" y="932" text-anchor="middle" font-size="9" fill="#c4b5fd" font-family="inherit">ASI-1 Powered</text>
+  </g>
+
+  <!-- Ask ASI-1 Copilot -->
+  <g class="node-card" data-title="Ask ASI-1 Copilot" data-desc="Natural language Q&A interface powered by ASI-1. Operators can ask any question about the active incident and receive context-aware, expert-level answers in real-time. Uses full incident context + agent findings." data-tags="NLP,Q&A,Copilot,Real-time">
+    <rect x="785" y="780" width="205" height="170" rx="10" fill="rgba(30,10,50,0.6)" stroke="rgba(139,92,246,0.5)" stroke-width="2" filter="url(#glow-violet)"/>
+    <text x="887" y="815" text-anchor="middle" font-size="18">✨</text>
+    <text x="887" y="838" text-anchor="middle" font-size="11" font-weight="700" fill="#c4b5fd" font-family="inherit">Ask ASI-1 Copilot</text>
+    <text x="887" y="857" text-anchor="middle" font-size="9" fill="#475569" font-family="inherit">"What should I do first?"</text>
+    <text x="887" y="873" text-anchor="middle" font-size="9" fill="#475569" font-family="inherit">"Is exfil still active?"</text>
+    <text x="887" y="889" text-anchor="middle" font-size="9" fill="#475569" font-family="inherit">"How did they get in?"</text>
+    <text x="887" y="905" text-anchor="middle" font-size="9" fill="#475569" font-family="inherit">"What's the blast radius?"</text>
+    <rect x="830" y="920" width="115" height="16" rx="3" fill="rgba(139,92,246,0.2)" stroke="rgba(139,92,246,0.4)" stroke-width="1"/>
+    <text x="887" y="932" text-anchor="middle" font-size="9" fill="#c4b5fd" font-family="inherit">Live Q&amp;A with ASI-1</text>
+  </g>
+
+  <!-- Incident Report -->
+  <g class="node-card" data-title="Incident Report Generator" data-desc="Auto-generates a full markdown incident report including executive summary, evidence chain, agent findings, containment actions, and escalation path. Downloadable as .md for regulatory compliance." data-tags="Report,Compliance,Markdown,GDPR">
+    <rect x="1025" y="780" width="205" height="170" rx="10" fill="url(#grad-output)" stroke="rgba(239,68,68,0.4)" stroke-width="1.5"/>
+    <text x="1127" y="815" text-anchor="middle" font-size="18">📄</text>
+    <text x="1127" y="838" text-anchor="middle" font-size="11" font-weight="700" fill="#fca5a5" font-family="inherit">Incident Report</text>
+    <text x="1127" y="857" text-anchor="middle" font-size="9" fill="#475569" font-family="inherit">Executive summary</text>
+    <text x="1127" y="873" text-anchor="middle" font-size="9" fill="#475569" font-family="inherit">Evidence chain</text>
+    <text x="1127" y="889" text-anchor="middle" font-size="9" fill="#475569" font-family="inherit">Agent findings</text>
+    <text x="1127" y="905" text-anchor="middle" font-size="9" fill="#475569" font-family="inherit">Download .md</text>
+    <rect x="1060" y="920" width="135" height="16" rx="3" fill="rgba(16,185,129,0.1)" stroke="rgba(16,185,129,0.2)" stroke-width="1"/>
+    <text x="1127" y="932" text-anchor="middle" font-size="9" fill="#6ee7b7" font-family="inherit">Regulatory compliant</text>
+  </g>
+
+  <!-- Alert System -->
+  <g class="node-card" data-title="Critical Alert System" data-desc="When a CRITICAL incident is detected, triggers a full-dashboard red pulse animation, top-banner alert, and visual kill chain highlighting. Immediate visual response for SOC operators." data-tags="SOC,Alert,UX,Real-time">
+    <rect x="1265" y="780" width="205" height="170" rx="10" fill="rgba(50,10,10,0.7)" stroke="rgba(239,68,68,0.6)" stroke-width="2" filter="url(#glow-red)"/>
+    <text x="1367" y="815" text-anchor="middle" font-size="18">🚨</text>
+    <text x="1367" y="838" text-anchor="middle" font-size="11" font-weight="700" fill="#fca5a5" font-family="inherit">Alert System</text>
+    <text x="1367" y="857" text-anchor="middle" font-size="9" fill="#475569" font-family="inherit">Dashboard flash</text>
+    <text x="1367" y="873" text-anchor="middle" font-size="9" fill="#475569" font-family="inherit">Red border pulse</text>
+    <text x="1367" y="889" text-anchor="middle" font-size="9" fill="#475569" font-family="inherit">Banner notification</text>
+    <text x="1367" y="905" text-anchor="middle" font-size="9" fill="#f87171" font-family="inherit">⚡ Instant Demo mode</text>
+    <circle class="pulse-ring" cx="1265" cy="789" fill="none" stroke="#ef4444" stroke-width="1.5"/>
+    <circle cx="1265" cy="789" r="5" fill="#ef4444"/>
+  </g>
+
+</svg>
+</div>
+
+<!-- LEGEND -->
+<div class="legend">
+  <h4>Legend</h4>
+  <div class="legend-item"><div class="legend-dot" style="background:#3b82f6"></div> Data Sources</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#10b981"></div> Event Processing</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#8b5cf6"></div> ASI-1 Agents</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div> Tool Execution</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div> Intelligence Output</div>
+  <div style="margin-top:8px; border-top:1px solid rgba(255,255,255,0.06); padding-top:8px">
+  <div class="legend-item"><div class="legend-line" style="background:repeating-linear-gradient(90deg,#3b82f6 0,#3b82f6 4px,transparent 4px,transparent 8px)"></div> Data Flow</div>
+  </div>
+</div>
+
+<!-- HINT -->
+<div class="hint">
+  <span>🖱 Scroll to zoom</span>
+  <span>✋ Drag to pan</span>
+  <span>🖱 Click node for details</span>
+</div>
+
+<script>
+// ── PAN & ZOOM ──
+const wrap = document.getElementById('canvas-wrap');
+const svg  = document.getElementById('svg');
+let scale = 1, tx = 0, ty = 0;
+let dragging = false, startX, startY, startTX, startTY;
+let flowEnabled = true;
+
+function applyTransform() {
+  svg.style.transform = `translate(${tx}px,${ty}px) scale(${scale})`;
+  svg.style.transformOrigin = '0 0';
+  document.getElementById('zoom-label').textContent = Math.round(scale*100)+'%';
+}
+
+wrap.addEventListener('wheel', e => {
+  e.preventDefault();
+  const rect = wrap.getBoundingClientRect();
+  const mx = e.clientX - rect.left;
+  const my = e.clientY - rect.top;
+  const delta = e.deltaY < 0 ? 1.12 : 0.89;
+  const newScale = Math.min(Math.max(scale * delta, 0.2), 4);
+  tx = mx - (mx - tx) * (newScale / scale);
+  ty = my - (my - ty) * (newScale / scale);
+  scale = newScale;
+  applyTransform();
+}, { passive: false });
+
+wrap.addEventListener('mousedown', e => {
+  if (e.target.closest('.node-card')) return;
+  dragging = true;
+  startX = e.clientX; startY = e.clientY;
+  startTX = tx; startTY = ty;
+});
+window.addEventListener('mousemove', e => {
+  if (!dragging) return;
+  tx = startTX + (e.clientX - startX);
+  ty = startTY + (e.clientY - startY);
+  applyTransform();
+});
+window.addEventListener('mouseup', () => dragging = false);
+
+function zoomIn()  { scale = Math.min(scale*1.2, 4);  applyTransform(); }
+function zoomOut() { scale = Math.max(scale*0.8, 0.2); applyTransform(); }
+function resetView() {
+  scale=0.85; tx=0; ty=0; applyTransform();
+  setTimeout(()=>{ tx=(wrap.offsetWidth - 1600*scale)/2; ty=(wrap.offsetHeight-1000*scale)/2; applyTransform(); }, 10);
+}
+
+// ── TOOLTIP ──
+const tooltip = document.getElementById('tooltip');
+const ttTitle = document.getElementById('tt-title');
+const ttDesc  = document.getElementById('tt-desc');
+const ttTags  = document.getElementById('tt-tags');
+
+document.querySelectorAll('.node-card').forEach(node => {
+  node.addEventListener('mouseenter', e => {
+    const title = node.dataset.title || '';
+    const desc  = node.dataset.desc  || '';
+    const tags  = (node.dataset.tags || '').split(',').filter(Boolean);
+    ttTitle.textContent = title;
+    ttDesc.textContent  = desc;
+    ttTags.innerHTML = tags.map(t=>`<span class="tag">${t}</span>`).join('');
+    tooltip.classList.add('show');
+  });
+  node.addEventListener('mousemove', e => {
+    tooltip.style.left = Math.min(e.clientX+16, window.innerWidth-300)+'px';
+    tooltip.style.top  = Math.min(e.clientY-10, window.innerHeight-160)+'px';
+  });
+  node.addEventListener('mouseleave', () => tooltip.classList.remove('show'));
+});
+
+// ── TOGGLE FLOW ANIMATION ──
+function toggleFlow() {
+  flowEnabled = !flowEnabled;
+  document.querySelectorAll('.flow-path,.flow-path-slow').forEach(el => {
+    el.style.animationPlayState = flowEnabled ? 'running' : 'paused';
+  });
+}
+
+// ── INIT ──
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    scale = 0.82;
+    tx = (wrap.offsetWidth  - 1600*scale) / 2;
+    ty = (wrap.offsetHeight - 1000*scale) / 2 + 20;
+    applyTransform();
+  }, 50);
+});
+</script>
+</body>
+</html>

@@ -85,7 +85,7 @@ export function CounterfactualPanel({
             size="sm"
             onClick={handleSimulate}
             disabled={!selectedAction || isLoading}
-            className="h-9 px-4 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700/50"
+            className="h-9 px-4 bg-violet-600 hover:bg-violet-500 disabled:bg-zinc-800 disabled:text-zinc-500 text-white font-semibold border-0"
           >
             {isLoading ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />

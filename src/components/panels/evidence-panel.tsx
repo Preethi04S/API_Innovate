@@ -59,31 +59,39 @@ export function EvidencePanel({ incident }: EvidencePanelProps) {
           </div>
 
           {/* Alternative hypotheses */}
-          {incident.alternative_hypotheses.length > 0 && (
+          {(incident.alternative_hypotheses?.length ?? 0) > 0 && (
             <div className="mt-2 pt-3 border-t border-zinc-800/40">
               <h3 className="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider mb-2 px-1">
                 Alternative Hypotheses
               </h3>
-              {incident.alternative_hypotheses.map((h, i) => (
-                <div key={i} className="rounded-lg border border-zinc-800/40 bg-zinc-900/20 p-3 mb-2">
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-xs text-zinc-300 font-medium">{h.hypothesis}</span>
-                    <span className="text-[10px] text-zinc-500 font-mono">
-                      {(h.confidence * 100).toFixed(0)}%
-                    </span>
+              {incident.alternative_hypotheses.map((h, i) => {
+                const text = typeof h === "string" ? h : h.hypothesis;
+                const conf = typeof h === "object" && h.confidence ? h.confidence : null;
+                const sup = typeof h === "object" ? (h.supporting_evidence ?? []) : [];
+                const con = typeof h === "object" ? (h.contradicting_evidence ?? []) : [];
+                return (
+                  <div key={i} className="rounded-lg border border-zinc-800/40 bg-zinc-900/20 p-3 mb-2">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-xs text-zinc-300 font-medium">{text}</span>
+                      {conf !== null && (
+                        <span className="text-[10px] text-zinc-500 font-mono">
+                          {(conf * 100).toFixed(0)}%
+                        </span>
+                      )}
+                    </div>
+                    {sup.length > 0 && (
+                      <p className="text-[10px] text-zinc-500">
+                        <span className="text-emerald-500/80">+</span> {sup.join("; ")}
+                      </p>
+                    )}
+                    {con.length > 0 && (
+                      <p className="text-[10px] text-zinc-500 mt-0.5">
+                        <span className="text-red-400/80">-</span> {con.join("; ")}
+                      </p>
+                    )}
                   </div>
-                  {h.supporting_evidence.length > 0 && (
-                    <p className="text-[10px] text-zinc-500">
-                      <span className="text-emerald-500/80">+</span> {h.supporting_evidence.join("; ")}
-                    </p>
-                  )}
-                  {h.contradicting_evidence.length > 0 && (
-                    <p className="text-[10px] text-zinc-500 mt-0.5">
-                      <span className="text-red-400/80">-</span> {h.contradicting_evidence.join("; ")}
-                    </p>
-                  )}
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>

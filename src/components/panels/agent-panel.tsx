@@ -7,8 +7,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 function stripMd(text: string): string {
   return text
     .replace(/#{1,4}\s+/g, "")
-    .replace(/\*\*(.+?)\*\*/gs, "$1")
-    .replace(/\*(.+?)\*/gs, "$1")
+    .replace(/\*\*(.+?)\*\*/g, "$1")
+    .replace(/\*(.+?)\*/g, "$1")
     .replace(/`(.+?)`/g, "$1")
     .replace(/^[-*]\s+/gm, "• ")
     .replace(/^\d+\.\s+/gm, "")

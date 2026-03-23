@@ -23,8 +23,8 @@ const QUICK_QUESTIONS = [
 function stripMd(text: string): string {
   return text
     .replace(/#{1,4}\s+/g, "")
-    .replace(/\*\*(.+?)\*\*/gs, "$1")
-    .replace(/\*(.+?)\*/gs, "$1")
+    .replace(/\*\*(.+?)\*\*/g, "$1")
+    .replace(/\*(.+?)\*/g, "$1")
     .replace(/`(.+?)`/g, "$1")
     .trim();
 }

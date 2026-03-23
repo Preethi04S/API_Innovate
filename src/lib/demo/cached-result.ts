@@ -134,9 +134,11 @@ export const DEMO_INCIDENT: IncidentAnalysis = {
 
 export const DEMO_TOOL_CALLS: ToolCallRecord[] = [
   {
-    tool: "lookup_playbook",
-    input: { incident_type: "multi_vector", severity: "critical" },
-    output: {
+    id: "tool-01",
+    timestamp: new Date().toISOString(),
+    name: "lookup_playbook",
+    arguments: { incident_type: "multi_vector", severity: "critical" },
+    result: {
       playbook: "MULTI-VECTOR-CRITICAL-001",
       steps: [
         "Isolate affected network segment immediately",
@@ -149,9 +151,11 @@ export const DEMO_TOOL_CALLS: ToolCallRecord[] = [
     },
   },
   {
-    tool: "query_asset_inventory",
-    input: { asset_ids: ["cam-l1-01", "switch-l1-01", "net-monitor-l1"] },
-    output: {
+    id: "tool-02",
+    timestamp: new Date().toISOString(),
+    name: "query_asset_inventory",
+    arguments: { asset_ids: ["cam-l1-01", "switch-l1-01", "net-monitor-l1"] },
+    result: {
       assets: [
         { id: "cam-l1-01", name: "Lab 1 Camera", zone: "Research Lab 1", firmware: "1.2.3", cves: ["CVE-2024-3721"], criticality: "high" },
         { id: "switch-l1-01", name: "Lab 1 Switch", zone: "Research Lab 1", firmware: "IOS-15.2", cves: [], criticality: "critical" },
@@ -160,9 +164,11 @@ export const DEMO_TOOL_CALLS: ToolCallRecord[] = [
     },
   },
   {
-    tool: "check_known_vulns",
-    input: { asset_id: "cam-l1-01", firmware_version: "1.2.3" },
-    output: {
+    id: "tool-03",
+    timestamp: new Date().toISOString(),
+    name: "check_known_vulns",
+    arguments: { asset_id: "cam-l1-01", firmware_version: "1.2.3" },
+    result: {
       vulnerabilities: [
         {
           cve: "CVE-2024-3721",
@@ -175,17 +181,21 @@ export const DEMO_TOOL_CALLS: ToolCallRecord[] = [
     },
   },
   {
-    tool: "draft_alert_message",
-    input: { severity: "critical", incident_type: "multi_vector", affected_zones: ["Research Lab 1"] },
-    output: {
+    id: "tool-04",
+    timestamp: new Date().toISOString(),
+    name: "draft_alert_message",
+    arguments: { severity: "critical", incident_type: "multi_vector", affected_zones: ["Research Lab 1"] },
+    result: {
       message: "CRITICAL SECURITY ALERT: Coordinated cyber-physical breach detected in Research Lab 1. Active data exfiltration in progress. Network segment isolation required immediately. All personnel: do not access Research Lab 1 until cleared by Security.",
       recipients: ["CISO", "Facility Director", "Security Operations", "Executive Leadership"],
     },
   },
   {
-    tool: "simulate_containment_action",
-    input: { action: "isolate_device", target: "switch-l1-01", incident_id: "INC-2026-0323-001" },
-    output: {
+    id: "tool-05",
+    timestamp: new Date().toISOString(),
+    name: "simulate_containment_action",
+    arguments: { action: "isolate_device", target: "switch-l1-01", incident_id: "INC-2026-0323-001" },
+    result: {
       success: true,
       estimated_risk_reduction: 0.72,
       side_effects: ["Research Lab 1 loses network connectivity temporarily", "Remote monitoring disabled for isolated segment"],

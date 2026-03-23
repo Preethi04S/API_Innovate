@@ -69,7 +69,7 @@ const KILL_CHAIN_STAGES = [
 
 function getActiveStages(events: TelemetryEvent[], incident: IncidentAnalysis | null): Set<string> {
   const active = new Set<string>();
-  const eventTypes = events.map((e) => e.event_type?.toLowerCase() ?? "");
+  const eventTypes = events.map((e) => (e.type as string)?.toLowerCase() ?? "");
 
   for (const stage of KILL_CHAIN_STAGES) {
     if (stage.triggers.some((t) => eventTypes.some((et) => et.includes(t)))) {

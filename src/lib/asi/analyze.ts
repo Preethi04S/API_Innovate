@@ -66,7 +66,6 @@ async function runSpecialistAgent(
   const response = await client.chat.completions.create({
     model: ASI_MODEL,
     messages,
-    temperature: 0.3,
     max_tokens: 1500,
   });
 
@@ -289,7 +288,6 @@ Based on all the above, produce a structured incident analysis as a JSON object 
       { role: "system", content: systemPrompt },
       { role: "user", content: userPrompt },
     ],
-    temperature: 0.2,
     max_tokens: 3000,
   });
 
@@ -419,7 +417,6 @@ export async function simulateCounterfactual(
         content: `Incident: ${JSON.stringify(incident)}\n\nProposed action: ${action}\nTarget: ${target}`,
       },
     ],
-    temperature: 0.2,
     max_tokens: 1000,
   });
 

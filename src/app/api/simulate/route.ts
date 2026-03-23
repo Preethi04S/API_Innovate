@@ -1,3 +1,4 @@
+export const maxDuration = 60;
 import { NextResponse } from "next/server";
 import { simulateCounterfactual } from "@/lib/asi/analyze";
 import { IncidentAnalysis } from "@/lib/schemas/incident";

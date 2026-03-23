@@ -1,3 +1,4 @@
+export const maxDuration = 300;
 import { NextResponse } from "next/server";
 import { getASIClient, ASI_MODEL } from "@/lib/asi/client";
 import { IncidentAnalysis } from "@/lib/schemas/incident";
@@ -42,7 +43,6 @@ ${agentSummary}`;
         { role: "user", content: question },
       ],
       max_tokens: 300,
-      temperature: 0.3,
     });
 
     const answer = response.choices[0]?.message?.content ?? "No response from ASI-1.";

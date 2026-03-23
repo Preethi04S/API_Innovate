@@ -190,7 +190,7 @@ export default function Dashboard() {
                 />
 
                 {/* Detail Tabs */}
-                <Panel className="h-[360px]">
+                <Panel className="h-[400px]">
                   <Tabs defaultValue="agents" className="h-full flex flex-col">
                     <TabsList className="bg-transparent border-b border-white/[0.04] rounded-none px-3 h-10 shrink-0 gap-0">
                       <TabsTrigger
@@ -244,10 +244,10 @@ export default function Dashboard() {
                         )}
                       </TabsTrigger>
                     </TabsList>
-                    <TabsContent value="agents" className="flex-1 min-h-0 overflow-hidden mt-0">
+                    <TabsContent value="agents" className="flex-1 min-h-0 overflow-auto mt-0">
                       <AgentPanel contributions={state.agentContributions} />
                     </TabsContent>
-                    <TabsContent value="copilot" className="flex-1 min-h-0 overflow-hidden mt-0">
+                    <TabsContent value="copilot" className="flex-1 min-h-0 overflow-auto mt-0">
                       <CopilotPanel
                         incident={state.incident}
                         messages={state.chatMessages}
@@ -255,13 +255,13 @@ export default function Dashboard() {
                         onAsk={askCopilot}
                       />
                     </TabsContent>
-                    <TabsContent value="evidence" className="flex-1 min-h-0 overflow-hidden mt-0">
+                    <TabsContent value="evidence" className="flex-1 min-h-0 overflow-auto mt-0">
                       <EvidencePanel incident={state.incident} />
                     </TabsContent>
-                    <TabsContent value="actions" className="flex-1 min-h-0 overflow-hidden mt-0">
+                    <TabsContent value="actions" className="flex-1 min-h-0 overflow-auto mt-0">
                       <ActionsPanel incident={state.incident} />
                     </TabsContent>
-                    <TabsContent value="tools" className="flex-1 min-h-0 overflow-hidden mt-0">
+                    <TabsContent value="tools" className="flex-1 min-h-0 overflow-auto mt-0">
                       <ToolCallsPanel toolCalls={state.toolCalls} />
                     </TabsContent>
                   </Tabs>

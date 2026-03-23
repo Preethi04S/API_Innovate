@@ -81,21 +81,35 @@ export function CounterfactualPanel({
               ))}
             </SelectContent>
           </Select>
-          <Button
-            size="sm"
+          <button
             onClick={handleSimulate}
             disabled={!selectedAction || isLoading}
-            className="h-9 px-4 bg-violet-600 hover:bg-violet-500 disabled:bg-zinc-800 disabled:text-zinc-500 text-white font-semibold border-0"
+            style={{
+              height: "36px",
+              padding: "0 16px",
+              borderRadius: "8px",
+              border: "none",
+              cursor: selectedAction && !isLoading ? "pointer" : "not-allowed",
+              background: selectedAction && !isLoading ? "#7c3aed" : "#27272a",
+              color: selectedAction && !isLoading ? "#ffffff" : "#71717a",
+              fontWeight: 600,
+              fontSize: "13px",
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+              flexShrink: 0,
+              transition: "background 0.15s",
+            }}
           >
             {isLoading ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
             ) : (
               <>
-                <FlaskConical className="h-3.5 w-3.5 mr-1.5" />
+                <FlaskConical className="h-3.5 w-3.5" />
                 Run
               </>
             )}
-          </Button>
+          </button>
         </div>
         <p className="text-[10px] text-zinc-600 mt-1.5 font-mono">
           Target: {target}

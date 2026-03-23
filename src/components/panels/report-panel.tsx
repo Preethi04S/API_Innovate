@@ -120,19 +120,31 @@ export function ReportPanel({
           <p className="text-xs text-zinc-400 mb-1">Export incident report</p>
           <p className="text-[10px] text-zinc-600">Includes evidence, ASI findings, and actions</p>
         </div>
-        <Button
+        <button
           onClick={handleGenerate}
           disabled={isGenerating}
-          size="sm"
-          className="bg-blue-600 hover:bg-blue-500 text-white font-semibold border-0"
+          style={{
+            padding: "8px 20px",
+            borderRadius: "8px",
+            border: "none",
+            cursor: isGenerating ? "not-allowed" : "pointer",
+            background: isGenerating ? "#27272a" : "#2563eb",
+            color: "#ffffff",
+            fontWeight: 600,
+            fontSize: "13px",
+            display: "flex",
+            alignItems: "center",
+            gap: "6px",
+            transition: "background 0.15s",
+          }}
         >
           {isGenerating ? (
-            <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
           ) : (
-            <FileText className="h-3.5 w-3.5 mr-1.5" />
+            <FileText className="h-3.5 w-3.5" />
           )}
           Generate Report
-        </Button>
+        </button>
       </div>
     );
   }

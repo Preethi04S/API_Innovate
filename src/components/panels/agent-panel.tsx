@@ -2,6 +2,7 @@
 
 import { AgentContribution } from "@/lib/asi/analyze";
 import { Bot, Shield, AlertTriangle, Crown } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 function stripMd(text: string): string {
   return text
@@ -61,7 +62,7 @@ export function AgentPanel({ contributions }: AgentPanelProps) {
 
   return (
     <div className="flex flex-col h-full min-h-0">
-      <div className="flex-1 min-h-0 overflow-y-auto">
+      <ScrollArea className="flex-1 min-h-0 h-full">
         <div className="p-3 space-y-3">
           {contributions.map((agent, i) => {
             const config = AGENT_CONFIG[agent.agent] || {
@@ -112,7 +113,7 @@ export function AgentPanel({ contributions }: AgentPanelProps) {
             );
           })}
         </div>
-      </div>
+      </ScrollArea>
     </div>
   );
 }

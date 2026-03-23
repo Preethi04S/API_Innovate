@@ -66,7 +66,6 @@ async function runSpecialistAgent(
   const response = await client.chat.completions.create({
     model: ASI_MODEL,
     messages,
-    max_tokens: 1500,
   });
 
   const content = response.choices[0]?.message?.content || "";
@@ -288,7 +287,6 @@ Based on all the above, produce a structured incident analysis as a JSON object 
       { role: "system", content: systemPrompt },
       { role: "user", content: userPrompt },
     ],
-    max_tokens: 3000,
   });
 
   const content = response.choices[0]?.message?.content || "";
@@ -417,7 +415,6 @@ export async function simulateCounterfactual(
         content: `Incident: ${JSON.stringify(incident)}\n\nProposed action: ${action}\nTarget: ${target}`,
       },
     ],
-    max_tokens: 1000,
   });
 
   const content = response.choices[0]?.message?.content || "";

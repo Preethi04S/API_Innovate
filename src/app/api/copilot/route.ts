@@ -42,7 +42,6 @@ ${agentSummary}`;
         { role: "system", content: systemPrompt },
         { role: "user", content: question },
       ],
-      max_tokens: 300,
     });
 
     const answer = response.choices[0]?.message?.content ?? "No response from ASI-1.";

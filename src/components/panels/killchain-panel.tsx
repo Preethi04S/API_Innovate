@@ -111,7 +111,7 @@ export function KillChainPanel({ incident, events }: KillChainPanelProps) {
       </div>
 
       {/* Kill Chain Stages */}
-      <div className="flex-1 flex flex-col justify-between gap-1.5">
+      <div className="flex-1 overflow-y-auto min-h-0 flex flex-col gap-1.5 pr-1">
         {KILL_CHAIN_STAGES.map((stage, idx) => {
           const isActive = activeStages.has(stage.id);
           const isLast = idx === KILL_CHAIN_STAGES.length - 1;

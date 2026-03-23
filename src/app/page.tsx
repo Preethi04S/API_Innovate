@@ -161,10 +161,10 @@ export default function Dashboard() {
               <div className="col-span-5 space-y-3">
                 {/* Zone Map + Kill Chain side by side */}
                 <div className="grid grid-cols-2 gap-3">
-                  <Panel className="h-[200px]">
+                  <Panel className="h-[240px]">
                     <ZoneMap events={state.events} />
                   </Panel>
-                  <Panel className={`h-[200px] transition-all duration-500 ${isCritical ? "border-red-500/25" : ""}`}>
+                  <Panel className={`h-[240px] transition-all duration-500 ${isCritical ? "border-red-500/25" : ""}`}>
                     {state.incident || state.events.length > 0 ? (
                       <KillChainPanel incident={state.incident} events={state.events} />
                     ) : (

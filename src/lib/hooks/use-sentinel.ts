@@ -77,6 +77,7 @@ export function useSentinel() {
   });
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const demoAbortRef = useRef(false); // cancels in-flight demo if scenario is started
 
   const fetchScenarios = useCallback(async () => {
     const res = await fetch("/api/events?action=scenarios");
@@ -95,6 +96,7 @@ export function useSentinel() {
   }, []);
 
   const startScenario = useCallback(async (scenarioId: string) => {
+    demoAbortRef.current = true; // cancel any in-flight demo animation
     // Reset state — clear demo mode so cached IoT result doesn't persist
     setState((s) => ({
       ...s,
@@ -246,6 +248,7 @@ export function useSentinel() {
   const loadDemoResult = useCallback(async () => {
     // Reset everything and start the rogue-camera scenario
     if (intervalRef.current) { clearInterval(intervalRef.current); intervalRef.current = null; }
+    demoAbortRef.current = false; // mark demo as active
 
     setState((s) => ({
       ...s,
@@ -276,13 +279,16 @@ export function useSentinel() {
         body: JSON.stringify({ action: "all" }),
       });
       const allData = await allRes.json();
-      if (allData.events) {
+      if (allData.events && !demoAbortRef.current) {
         setState((s) => ({ ...s, events: allData.events }));
       }
     } catch (_) { /* continue with demo even if events fail */ }
 
     // Simulate dramatic 3-second analysis
     await new Promise((r) => setTimeout(r, 3000));
+
+    // If user started a real scenario during the wait, do not overwrite their state
+    if (demoAbortRef.current) return;
 
     setState((s) => ({
       ...s,
@@ -374,6 +380,7 @@ export function useSentinel() {
   }, [state.incident, state.toolCalls, state.agentContributions]);
 
   const resetAll = useCallback(async () => {
+    demoAbortRef.current = true; // cancel any in-flight demo
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
       intervalRef.current = null;

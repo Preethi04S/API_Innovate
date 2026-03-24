@@ -124,6 +124,13 @@ export default function Dashboard() {
 
   const isCritical = state.incident?.severity === "critical";
 
+  // Demo mode is true if the flag is set OR if the incident is the pre-loaded demo incident
+  const isDemoActive = state.isDemoMode || state.incident?.incident_id === "INC-2026-0323-001";
+  const effectiveSimResults = state.simulationResults.length > 0
+    ? state.simulationResults
+    : (isDemoActive ? DEMO_SIMULATION_RESULTS : []);
+  const effectiveReport = state.reportMarkdown ?? (isDemoActive ? DEMO_REPORT_MARKDOWN : null);
+
   return (
     <div className={`min-h-screen overflow-auto bg-[#060a14] transition-all duration-1000 ${isCritical && !state.isAnalyzing ? "bg-[#0a0508]" : ""}`}>
       {/* Critical alert overlay */}
@@ -303,13 +310,13 @@ export default function Dashboard() {
                 <Panel className="h-[480px]">
                   <CounterfactualPanel
                     incident={state.incident}
-                    results={state.simulationResults.length > 0 ? state.simulationResults : (state.isDemoMode ? DEMO_SIMULATION_RESULTS : [])}
+                    results={effectiveSimResults}
                     onSimulate={runCounterfactual}
                   />
                 </Panel>
                 <Panel className="h-[340px]">
                   <ReportPanel
-                    markdown={state.reportMarkdown ?? (state.isDemoMode ? DEMO_REPORT_MARKDOWN : null)}
+                    markdown={effectiveReport}
                     hasIncident={!!state.incident}
                     onGenerate={generateReport}
                   />

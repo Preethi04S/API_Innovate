@@ -242,3 +242,73 @@ export const DEMO_AGENT_CONTRIBUTIONS: AgentContribution[] = [
     ],
   },
 ];
+
+interface SimulationResult {
+  action: string;
+  risk_before: number;
+  risk_after: number;
+  timeline: string;
+  consequences: string[];
+  recommendation: string;
+}
+
+export const DEMO_SIMULATION_RESULTS: SimulationResult[] = [
+  {
+    action: "isolate_device",
+    risk_before: 96,
+    risk_after: 18,
+    timeline: "2–5 minutes",
+    consequences: [
+      "Network threat neutralised — rogue device loses C2 channel",
+      "Device quarantined to VLAN sandbox for forensic analysis",
+      "Lateral movement to adjacent segments stopped immediately",
+      "Exfiltration channel severed — data loss halted",
+    ],
+    recommendation: "Execute immediately — highest risk reduction with minimal operational downtime.",
+  },
+];
+
+export const DEMO_REPORT_MARKDOWN = `# Incident Report: Coordinated Physical-Cyber Breach: Badge Reconnaissance and Camera Admin Attack
+
+**Incident ID:** INC-2026-0323-001
+**Timestamp:** 23/3/2026, 9:15:00 am
+**Severity:** 🔴 CRITICAL
+**Category:** multi vector
+**Confidence:** 96%
+
+---
+
+## Executive Summary
+
+An unauthorized IoT device (MAC: aa:bb:cc:dd:ee:01, vendor unknown/spoofed) was physically connected to the Research Lab 1 network rack, injected malware into camera cam-l1-01 exploiting CVE-2024-3721, disabled surveillance, and exfiltrated 2.4 GB of sensitive research data to external IP 203.0.113.77 via encrypted TLS.
+
+## Root Cause
+
+Physical security bypass allowed an unauthorized individual to access the Research Lab 1 network rack and deploy a rogue IoT device with pre-loaded malware. The device exploited CVE-2024-3721 (CVSS 9.1) in camera firmware 1.2.3 to disable surveillance and exfiltrate data via a TLS-encrypted covert channel to a known APT-linked IP range.
+
+## Business / Safety Impact
+
+- 2.4 GB of potentially sensitive research data exfiltrated to a suspicious external destination
+- Complete surveillance loss in Research Lab 1 — physical safety blindspot created
+- Potential regulatory compliance violations (NFPA 101, data breach notification laws)
+
+## Escalation Path
+
+CISO → Facility Director → Legal Counsel → Executive Leadership
+
+## Immediate Actions Required
+
+1. Isolate rogue device — network quarantine effective immediately
+2. Block IP 203.0.113.77 and full /24 subnet at perimeter firewall
+3. Initiate full packet capture for forensic analysis
+4. Deploy threat hunting rules for CVE-2024-3721 across all camera assets
+5. Brief CISO and executive team within 30 minutes
+
+## MITRE ATT&CK Kill Chain
+
+- **Recon** (TA0043) — Network reconnaissance detected
+- **Initial Access** (TA0001) — Rogue IoT device physically connected
+- **Execution** (TA0002) — CVE-2024-3721 exploited in camera firmware
+- **Persistence** (TA0003) — Surveillance disabled, foothold established
+- **Exfiltration** (TA0010) — 2.4 GB data sent via TLS to APT-linked IP
+`;

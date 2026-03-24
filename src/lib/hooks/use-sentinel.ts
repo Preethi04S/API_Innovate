@@ -5,7 +5,7 @@ import { TelemetryEvent } from "@/lib/schemas/events";
 import { IncidentAnalysis } from "@/lib/schemas/incident";
 import { ToolCallRecord } from "@/lib/tools/executor";
 import { AgentContribution } from "@/lib/asi/analyze";
-import { DEMO_INCIDENT, DEMO_TOOL_CALLS, DEMO_AGENT_CONTRIBUTIONS } from "@/lib/demo/cached-result";
+import { DEMO_INCIDENT, DEMO_TOOL_CALLS, DEMO_AGENT_CONTRIBUTIONS, DEMO_SIMULATION_RESULTS, DEMO_REPORT_MARKDOWN } from "@/lib/demo/cached-result";
 
 export interface ChatMessage {
   role: "user" | "assistant";
@@ -70,8 +70,8 @@ export function useSentinel() {
     incident: DEMO_INCIDENT,
     toolCalls: DEMO_TOOL_CALLS,
     agentContributions: DEMO_AGENT_CONTRIBUTIONS,
-    reportMarkdown: null,
-    simulationResults: [],
+    reportMarkdown: DEMO_REPORT_MARKDOWN,
+    simulationResults: DEMO_SIMULATION_RESULTS,
     chatMessages: [],
     isChatLoading: false,
     isDemoMode: true,
@@ -297,6 +297,8 @@ export function useSentinel() {
       incident: DEMO_INCIDENT,
       toolCalls: DEMO_TOOL_CALLS,
       agentContributions: DEMO_AGENT_CONTRIBUTIONS,
+      simulationResults: DEMO_SIMULATION_RESULTS,
+      reportMarkdown: DEMO_REPORT_MARKDOWN,
       isAnalyzing: false,
     }));
   }, []);

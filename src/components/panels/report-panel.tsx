@@ -15,30 +15,30 @@ interface ReportPanelProps {
 function MarkdownLine({ line, idx }: { line: string; idx: number }) {
   // H1
   if (/^# (.+)/.test(line)) {
-    return <h1 key={idx} className="text-sm font-bold text-white mt-3 mb-1">{line.replace(/^# /, "")}</h1>;
+    return <h1 key={idx} className="text-base font-bold text-white mt-4 mb-2">{line.replace(/^# /, "")}</h1>;
   }
   // H2
   if (/^## (.+)/.test(line)) {
-    return <h2 key={idx} className="text-[11px] font-semibold text-blue-400 uppercase tracking-wider mt-3 mb-1 border-b border-white/[0.06] pb-1">{line.replace(/^## /, "")}</h2>;
+    return <h2 key={idx} className="text-sm font-bold text-blue-400 uppercase tracking-wider mt-4 mb-2 border-b border-white/[0.08] pb-1">{line.replace(/^## /, "")}</h2>;
   }
   // H3
   if (/^### (.+)/.test(line)) {
-    return <h3 key={idx} className="text-[11px] font-semibold text-zinc-300 mt-2 mb-0.5">{line.replace(/^### /, "")}</h3>;
+    return <h3 key={idx} className="text-sm font-semibold text-zinc-200 mt-3 mb-1">{line.replace(/^### /, "")}</h3>;
   }
   // H4
   if (/^#### (.+)/.test(line)) {
-    return <h4 key={idx} className="text-[10px] font-semibold text-zinc-400 mt-1.5 mb-0.5">{line.replace(/^#### /, "")}</h4>;
+    return <h4 key={idx} className="text-xs font-semibold text-zinc-400 mt-2 mb-0.5">{line.replace(/^#### /, "")}</h4>;
   }
   // HR
   if (/^---+$/.test(line.trim())) {
-    return <hr key={idx} className="border-white/[0.08] my-2" />;
+    return <hr key={idx} className="border-white/[0.08] my-3" />;
   }
   // Bullet
   if (/^[-*] (.+)/.test(line)) {
     const text = line.replace(/^[-*] /, "");
     return (
-      <div key={idx} className="flex gap-2 text-[11px] text-zinc-400 leading-relaxed pl-2">
-        <span className="text-zinc-600 shrink-0">•</span>
+      <div key={idx} className="flex gap-2 text-sm text-zinc-300 leading-relaxed pl-2 my-0.5">
+        <span className="text-zinc-500 shrink-0 mt-0.5">•</span>
         <span dangerouslySetInnerHTML={{ __html: inlineMd(text) }} />
       </div>
     );
@@ -48,8 +48,8 @@ function MarkdownLine({ line, idx }: { line: string; idx: number }) {
     const match = line.match(/^(\d+)\. (.+)/);
     if (match) {
       return (
-        <div key={idx} className="flex gap-2 text-[11px] text-zinc-400 leading-relaxed pl-2">
-          <span className="text-zinc-600 shrink-0 w-4">{match[1]}.</span>
+        <div key={idx} className="flex gap-2 text-sm text-zinc-300 leading-relaxed pl-2 my-0.5">
+          <span className="text-zinc-500 shrink-0 w-5 font-mono">{match[1]}.</span>
           <span dangerouslySetInnerHTML={{ __html: inlineMd(match[2]) }} />
         </div>
       );
@@ -57,11 +57,11 @@ function MarkdownLine({ line, idx }: { line: string; idx: number }) {
   }
   // Empty line
   if (line.trim() === "") {
-    return <div key={idx} className="h-1.5" />;
+    return <div key={idx} className="h-2" />;
   }
   // Normal paragraph
   return (
-    <p key={idx} className="text-[11px] text-zinc-400 leading-relaxed"
+    <p key={idx} className="text-sm text-zinc-300 leading-relaxed"
       dangerouslySetInnerHTML={{ __html: inlineMd(line) }} />
   );
 }
@@ -154,10 +154,10 @@ export function ReportPanel({
   return (
     <div className="flex flex-col h-full min-h-0">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-2.5 border-b border-zinc-800/60 shrink-0">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-800/60 shrink-0">
         <div className="flex items-center gap-2">
-          <FileText className="h-3.5 w-3.5 text-zinc-600" />
-          <h2 className="text-xs font-semibold text-zinc-300 uppercase tracking-wider">
+          <FileText className="h-4 w-4 text-zinc-500" />
+          <h2 className="text-sm font-bold text-zinc-200 uppercase tracking-wider">
             Report
           </h2>
         </div>
@@ -165,9 +165,9 @@ export function ReportPanel({
           variant="outline"
           size="sm"
           onClick={handleDownload}
-          className="h-7 text-[10px] border-zinc-700/50 bg-zinc-800/50 hover:bg-zinc-700"
+          className="h-8 text-xs border-zinc-700/50 bg-zinc-800/50 hover:bg-zinc-700 font-semibold"
         >
-          <Download className="h-3 w-3 mr-1" />
+          <Download className="h-3.5 w-3.5 mr-1.5" />
           Download .md
         </Button>
       </div>

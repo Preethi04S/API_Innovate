@@ -59,23 +59,23 @@ export function CounterfactualPanel({
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex items-center gap-2 px-4 py-2.5 border-b border-zinc-800/60">
-        <FlaskConical className="h-3.5 w-3.5 text-zinc-600" />
-        <h2 className="text-xs font-semibold text-zinc-300 uppercase tracking-wider">
+      <div className="flex items-center gap-2 px-4 py-3 border-b border-zinc-800/60">
+        <FlaskConical className="h-4 w-4 text-zinc-500" />
+        <h2 className="text-sm font-bold text-zinc-200 uppercase tracking-wider">
           What-If Simulator
         </h2>
       </div>
 
-      <div className="p-3 border-b border-zinc-800/40">
+      <div className="p-4 border-b border-zinc-800/40">
         <div className="flex gap-2">
           <Select value={selectedAction} onValueChange={(v) => setSelectedAction(v ?? "")}>
-            <SelectTrigger className="h-9 text-xs bg-zinc-900/50 border-zinc-700/50 flex-1">
+            <SelectTrigger className="h-10 text-sm bg-zinc-900/50 border-zinc-700/50 flex-1">
               <SelectValue placeholder="Choose action..." />
             </SelectTrigger>
             <SelectContent>
               {ACTIONS.map((a) => (
-                <SelectItem key={a.value} value={a.value} className="text-xs">
-                  <span className="font-medium">{a.label}</span>
+                <SelectItem key={a.value} value={a.value} className="text-sm">
+                  <span className="font-semibold">{a.label}</span>
                   <span className="text-zinc-500 ml-1.5">— {a.desc}</span>
                 </SelectItem>
               ))}
@@ -85,15 +85,15 @@ export function CounterfactualPanel({
             onClick={handleSimulate}
             disabled={!selectedAction || isLoading}
             style={{
-              height: "36px",
-              padding: "0 16px",
+              height: "40px",
+              padding: "0 20px",
               borderRadius: "8px",
               border: "none",
               cursor: selectedAction && !isLoading ? "pointer" : "not-allowed",
               background: selectedAction && !isLoading ? "#7c3aed" : "#27272a",
               color: selectedAction && !isLoading ? "#ffffff" : "#71717a",
-              fontWeight: 600,
-              fontSize: "13px",
+              fontWeight: 700,
+              fontSize: "14px",
               display: "flex",
               alignItems: "center",
               gap: "6px",
@@ -102,16 +102,16 @@ export function CounterfactualPanel({
             }}
           >
             {isLoading ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
               <>
-                <FlaskConical className="h-3.5 w-3.5" />
+                <FlaskConical className="h-4 w-4" />
                 Run
               </>
             )}
           </button>
         </div>
-        <p className="text-[10px] text-zinc-600 mt-1.5 font-mono">
+        <p className="text-xs text-zinc-500 mt-2 font-mono font-semibold">
           Target: {target}
         </p>
       </div>
@@ -139,16 +139,16 @@ export function CounterfactualPanel({
                 }`}
               >
                 <div className="flex items-center justify-between mb-3">
-                  <Badge variant="outline" className="text-[10px] border-zinc-700/50 text-zinc-400 font-medium">
+                  <Badge variant="outline" className="text-xs border-zinc-700/50 text-zinc-300 font-semibold px-2 py-0.5">
                     {result.action.replace(/_/g, " ")}
                   </Badge>
                   <div className="flex items-center gap-1.5">
                     {isPositive ? (
-                      <TrendingDown className="h-4 w-4 text-emerald-400" />
+                      <TrendingDown className="h-5 w-5 text-emerald-400" />
                     ) : (
-                      <TrendingUp className="h-4 w-4 text-red-400" />
+                      <TrendingUp className="h-5 w-5 text-red-400" />
                     )}
-                    <span className={`text-lg font-bold ${isPositive ? "text-emerald-400" : "text-red-400"}`}>
+                    <span className={`text-2xl font-black ${isPositive ? "text-emerald-400" : "text-red-400"}`}>
                       {isPositive ? "-" : "+"}
                       {Math.abs(riskDelta)}%
                     </span>
@@ -159,23 +159,23 @@ export function CounterfactualPanel({
                 <div className="flex items-center gap-3 mb-3">
                   <div className="flex-1">
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-[9px] text-zinc-600 uppercase tracking-wider">Before</span>
-                      <span className="text-[10px] text-zinc-400 font-mono">{result.risk_before}%</span>
+                      <span className="text-xs text-zinc-500 font-bold uppercase tracking-wider">Before</span>
+                      <span className="text-xs text-zinc-300 font-mono font-bold">{result.risk_before}%</span>
                     </div>
-                    <div className="h-2 rounded-full bg-zinc-800/60 overflow-hidden">
+                    <div className="h-2.5 rounded-full bg-zinc-800/60 overflow-hidden">
                       <div
                         className="h-full bg-red-500/70 rounded-full transition-all duration-500"
                         style={{ width: `${result.risk_before}%` }}
                       />
                     </div>
                   </div>
-                  <ArrowRight className="h-3 w-3 text-zinc-700 shrink-0" />
+                  <ArrowRight className="h-4 w-4 text-zinc-600 shrink-0" />
                   <div className="flex-1">
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-[9px] text-zinc-600 uppercase tracking-wider">After</span>
-                      <span className="text-[10px] text-zinc-400 font-mono">{result.risk_after}%</span>
+                      <span className="text-xs text-zinc-500 font-bold uppercase tracking-wider">After</span>
+                      <span className="text-xs text-zinc-300 font-mono font-bold">{result.risk_after}%</span>
                     </div>
-                    <div className="h-2 rounded-full bg-zinc-800/60 overflow-hidden">
+                    <div className="h-2.5 rounded-full bg-zinc-800/60 overflow-hidden">
                       <div
                         className={`h-full rounded-full transition-all duration-500 ${
                           isPositive ? "bg-emerald-500/70" : "bg-red-500/70"
@@ -186,21 +186,21 @@ export function CounterfactualPanel({
                   </div>
                 </div>
 
-                <div className="text-[10px] text-zinc-500 mb-2">
-                  Effect timeline: <span className="text-zinc-400">{result.timeline}</span>
+                <div className="text-xs text-zinc-400 mb-3 font-medium">
+                  Effect timeline: <span className="text-zinc-300 font-semibold">{result.timeline}</span>
                 </div>
 
-                <div className="space-y-1 mb-3">
+                <div className="space-y-1.5 mb-3">
                   {result.consequences.slice(0, 3).map((c, j) => (
-                    <p key={j} className="text-[10px] text-zinc-500 flex items-start gap-1.5">
-                      <span className="text-zinc-700 mt-0.5">-</span>
+                    <p key={j} className="text-xs text-zinc-400 flex items-start gap-2">
+                      <span className="text-zinc-600 mt-0.5 shrink-0">•</span>
                       {c}
                     </p>
                   ))}
                 </div>
 
-                <div className="pt-2 border-t border-zinc-800/30">
-                  <p className="text-[11px] text-zinc-300 font-medium">
+                <div className="pt-2.5 border-t border-zinc-800/40">
+                  <p className="text-sm text-zinc-200 font-semibold">
                     {result.recommendation}
                   </p>
                 </div>

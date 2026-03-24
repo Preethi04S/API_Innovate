@@ -138,31 +138,31 @@ export function IncidentBoard({
       <p className="text-sm text-zinc-300 mb-4 leading-relaxed">{incident.summary}</p>
 
       <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-1">
-          <h4 className="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider">
+        <div className="space-y-1.5">
+          <h4 className="text-xs font-bold text-zinc-500 uppercase tracking-wider">
             Root Cause
           </h4>
-          <p className="text-xs text-zinc-300 leading-relaxed">{incident.probable_root_cause}</p>
+          <p className="text-sm text-zinc-300 leading-relaxed">{incident.probable_root_cause}</p>
         </div>
-        <div className="space-y-1">
-          <h4 className="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider">
+        <div className="space-y-1.5">
+          <h4 className="text-xs font-bold text-zinc-500 uppercase tracking-wider">
             Business / Safety Impact
           </h4>
-          <p className="text-xs text-zinc-300 leading-relaxed">{incident.business_or_safety_impact}</p>
+          <p className="text-sm text-zinc-300 leading-relaxed">{incident.business_or_safety_impact}</p>
         </div>
       </div>
 
       {/* Escalation */}
       <div className="mt-4 pt-3 border-t border-zinc-800/50">
-        <div className="flex items-center gap-2">
-          <TrendingUp className="h-3 w-3 text-zinc-500" />
-          <span className="text-[10px] text-zinc-500 font-semibold uppercase tracking-wider">Escalation:</span>
-          <div className="flex items-center gap-1">
+        <div className="flex items-center gap-2 flex-wrap">
+          <TrendingUp className="h-3.5 w-3.5 text-zinc-500" />
+          <span className="text-xs text-zinc-500 font-bold uppercase tracking-wider">Escalation:</span>
+          <div className="flex items-center gap-1 flex-wrap">
             {incident.escalation_path.map((step, i) => (
               <span key={i} className="flex items-center gap-1">
-                <span className="text-[10px] text-zinc-400">{step}</span>
+                <span className="text-xs text-zinc-300 font-medium">{step}</span>
                 {i < incident.escalation_path.length - 1 && (
-                  <span className="text-zinc-700 text-[10px]">→</span>
+                  <span className="text-zinc-600 text-xs">→</span>
                 )}
               </span>
             ))}

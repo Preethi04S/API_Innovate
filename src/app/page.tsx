@@ -210,6 +210,7 @@ export default function Dashboard() {
                 <IncidentBoard
                   incident={state.incident}
                   isAnalyzing={state.isAnalyzing}
+                  isSimulating={state.isSimulating}
                   hasEvents={state.events.length > 0 && !state.isSimulating}
                   onAnalyze={analyzeEvents}
                   error={state.error}

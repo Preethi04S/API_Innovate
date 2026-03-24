@@ -8,6 +8,7 @@ import { Brain, Loader2, ShieldAlert, TrendingUp } from "lucide-react";
 interface IncidentBoardProps {
   incident: IncidentAnalysis | null;
   isAnalyzing: boolean;
+  isSimulating: boolean;
   hasEvents: boolean;
   onAnalyze: () => void;
   error: string | null;
@@ -24,11 +25,13 @@ const SEVERITY_CONFIG: Record<string, { bg: string; text: string; border: string
 export function IncidentBoard({
   incident,
   isAnalyzing,
+  isSimulating,
   hasEvents,
   onAnalyze,
   error,
 }: IncidentBoardProps) {
-  if (!incident && !isAnalyzing) {
+  // Always hide old incident while a new scenario is actively streaming events
+  if ((!incident || isSimulating) && !isAnalyzing) {
     return (
       <div className={`rounded-xl border border-zinc-800/60 ${hasEvents ? "bg-gradient-to-br from-emerald-500/5 via-zinc-900/50 to-zinc-900/50 border-emerald-500/20" : "bg-zinc-900/30"} p-8 flex flex-col items-center justify-center gap-4`}>
         <div className="relative">

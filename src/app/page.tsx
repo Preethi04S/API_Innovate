@@ -98,24 +98,30 @@ export default function Dashboard() {
     }
   }, [state.incident]);
 
-  // Auto-run simulation after demo loads so right panel is never empty
+  // Auto-run simulation once after demo loads — only in demo mode
+  const autoSimRan = useRef(false);
   useEffect(() => {
-    if (state.isDemoMode && state.incident && state.simulationResults.length === 0) {
+    if (state.isDemoMode && state.incident && state.simulationResults.length === 0 && !autoSimRan.current) {
+      autoSimRan.current = true;
       const timer = setTimeout(() => {
         runCounterfactual("isolate_device", state.incident?.affected_assets[0] || "cam-l1-01");
       }, 800);
       return () => clearTimeout(timer);
     }
+    if (!state.isDemoMode) autoSimRan.current = false;
   }, [state.isDemoMode, state.incident, state.simulationResults.length, runCounterfactual]);
 
-  // Auto-generate report after demo loads
+  // Auto-generate report once after demo loads — only in demo mode
+  const autoReportRan = useRef(false);
   useEffect(() => {
-    if (state.isDemoMode && state.incident && !state.reportMarkdown) {
+    if (state.isDemoMode && state.incident && !state.reportMarkdown && !autoReportRan.current) {
+      autoReportRan.current = true;
       const timer = setTimeout(() => {
         generateReport();
       }, 2500);
       return () => clearTimeout(timer);
     }
+    if (!state.isDemoMode) autoReportRan.current = false;
   }, [state.isDemoMode, state.incident, state.reportMarkdown, generateReport]);
 
   const isCritical = state.incident?.severity === "critical";

@@ -95,7 +95,7 @@ export function useSentinel() {
   }, []);
 
   const startScenario = useCallback(async (scenarioId: string) => {
-    // Reset state
+    // Reset state — clear demo mode so cached IoT result doesn't persist
     setState((s) => ({
       ...s,
       events: [],
@@ -104,9 +104,11 @@ export function useSentinel() {
       agentContributions: [],
       reportMarkdown: null,
       simulationResults: [],
+      chatMessages: [],
       error: null,
       activeScenarioId: scenarioId,
       isSimulating: true,
+      isDemoMode: false,
     }));
 
     try {

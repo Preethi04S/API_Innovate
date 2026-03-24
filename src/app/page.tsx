@@ -20,6 +20,7 @@ import { CopilotPanel } from "@/components/panels/copilot-panel";
 import { KillChainPanel } from "@/components/panels/killchain-panel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FileSearch, CheckCircle2, Bot, Wrench, Sparkles } from "lucide-react";
+import { DEMO_SIMULATION_RESULTS, DEMO_REPORT_MARKDOWN } from "@/lib/demo/cached-result";
 
 function Panel({
   children,
@@ -78,7 +79,9 @@ export default function Dashboard() {
   useEffect(() => {
     fetchScenarios();
     fetchAssets();
-  }, [fetchScenarios, fetchAssets]);
+    // Pre-load demo events on mount so EventStream is populated
+    loadAllEvents();
+  }, [fetchScenarios, fetchAssets, loadAllEvents]);
 
   // Trigger critical alert when a new CRITICAL incident is detected
   useEffect(() => {
@@ -300,13 +303,13 @@ export default function Dashboard() {
                 <Panel className="h-[480px]">
                   <CounterfactualPanel
                     incident={state.incident}
-                    results={state.simulationResults}
+                    results={state.simulationResults.length > 0 ? state.simulationResults : (state.isDemoMode ? DEMO_SIMULATION_RESULTS : [])}
                     onSimulate={runCounterfactual}
                   />
                 </Panel>
                 <Panel className="h-[340px]">
                   <ReportPanel
-                    markdown={state.reportMarkdown}
+                    markdown={state.reportMarkdown ?? (state.isDemoMode ? DEMO_REPORT_MARKDOWN : null)}
                     hasIncident={!!state.incident}
                     onGenerate={generateReport}
                   />

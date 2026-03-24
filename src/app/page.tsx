@@ -78,12 +78,7 @@ export default function Dashboard() {
   useEffect(() => {
     fetchScenarios();
     fetchAssets();
-    // Auto-load demo so judges never see empty state
-    const timer = setTimeout(() => {
-      loadDemoResult();
-    }, 1200);
-    return () => clearTimeout(timer);
-  }, [fetchScenarios, fetchAssets, loadDemoResult]);
+  }, [fetchScenarios, fetchAssets]);
 
   // Trigger critical alert when a new CRITICAL incident is detected
   useEffect(() => {

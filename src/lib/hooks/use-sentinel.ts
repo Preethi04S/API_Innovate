@@ -58,21 +58,23 @@ export interface SimulationResult {
 }
 
 export function useSentinel() {
+  // Pre-load demo data synchronously so the dashboard is never empty on first render
+  // startScenario clears this when the user picks a real scenario
   const [state, setState] = useState<SentinelState>({
     scenarios: [],
     assets: [],
     events: [],
-    activeScenarioId: null,
+    activeScenarioId: "scenario-rogue-camera",
     isSimulating: false,
     isAnalyzing: false,
-    incident: null,
-    toolCalls: [],
-    agentContributions: [],
+    incident: DEMO_INCIDENT,
+    toolCalls: DEMO_TOOL_CALLS,
+    agentContributions: DEMO_AGENT_CONTRIBUTIONS,
     reportMarkdown: null,
     simulationResults: [],
     chatMessages: [],
     isChatLoading: false,
-    isDemoMode: false,
+    isDemoMode: true,
     error: null,
   });
 

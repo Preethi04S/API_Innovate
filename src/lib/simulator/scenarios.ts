@@ -25,9 +25,9 @@ export function buildScenarios(baseTime: Date = new Date()): Scenario[] {
 function buildRogueCameraExfiltration(base: Date): Scenario {
   return {
     id: "scenario-rogue-camera",
-    name: "Rogue IoT Camera Exfiltration",
+    name: "Rogue IoT Camera — Active Data Exfiltration",
     description:
-      "An IoT camera in Lab 1 begins transferring large volumes of data to an external IP after a firmware anomaly. Correlated with a USB insertion event and unknown device on the network.",
+      "A compromised IoT camera in Lab 1 receives a malicious firmware update via USB, silently drops off the camera feed, then establishes an encrypted TLS tunnel to an external C2 server at 203.0.113.77. Over 2.4 GB of data is exfiltrated in under 60 seconds — 35x above the network baseline. Correlated with an unrecognized MAC address joining the segment and three failed admin login attempts on the managed switch.",
     expectedSeverity: "critical",
     events: [
       {
@@ -72,9 +72,9 @@ function buildRogueCameraExfiltration(base: Date): Scenario {
 function buildServerRoomOverheat(base: Date): Scenario {
   return {
     id: "scenario-server-overheating",
-    name: "Server Room Overheating + Unauthorized Access",
+    name: "Server Room Meltdown — HVAC Failure & After-Hours Breach",
     description:
-      "HVAC failure leads to rising server room temperatures while an unauthorized badge swipe grants access during off-hours.",
+      "Cooling unit compressor failure causes server room temperature to spike from 24°C to 34°C in under 80 seconds — well past the 22°C operational threshold. Humidity simultaneously breaches 68%. Mid-crisis, a visitor-level badge (BADGE-0042) swipes into the restricted server room after hours and motion is detected near Rack Row 3. The convergence of physical and environmental failures suggests a deliberate sabotage attempt.",
     expectedSeverity: "critical",
     events: [
       {
@@ -123,9 +123,9 @@ function buildServerRoomOverheat(base: Date): Scenario {
 function buildSmartLockAbuse(base: Date): Scenario {
   return {
     id: "scenario-smart-lock-abuse",
-    name: "Smart-Lock Abuse After Badge Anomaly",
+    name: "Cloned Badge — Multi-Zone After-Hours Sweep",
     description:
-      "A cloned or stolen badge is used to access multiple zones in rapid succession during off-hours, triggering failed logins and multiple door events.",
+      "Badge BADGE-0099 (assigned to J. Martinez) sweeps through the lobby, office wing, Lab 2, and parking garage in under 30 seconds — a physical impossibility for a single person walking. The badge is denied at the server room due to insufficient clearance, then immediately attempts 5 failed admin logins on Lab 2's camera system from IP 10.0.4.88. The pattern is consistent with a cloned credential used by an intruder conducting reconnaissance.",
     expectedSeverity: "high",
     events: [
       {
@@ -174,9 +174,9 @@ function buildSmartLockAbuse(base: Date): Scenario {
 function buildColdStorageDrift(base: Date): Scenario {
   return {
     id: "scenario-cold-storage-drift",
-    name: "Cold-Storage Temperature Drift + Suspicious Entry",
+    name: "Cold-Chain Compromise — Pharma Storage & Blind-Spot Intrusion",
     description:
-      "Clinic cold-storage temperatures rise above safe limits while an unauthorized individual accesses the area and the backup sensor goes offline.",
+      "Pharmaceutical cold-storage temperatures climb from -18°C to -8°C over 130 seconds, breaching the -20°C preservation threshold and risking spoilage of temperature-sensitive inventory. A temporary contractor badge (BADGE-TEMP-007) opens the unit mid-drift; humidity soars to 78% against a 40% limit. The surveillance camera then drops offline — eliminating the only visual record of who entered. A coordinated cover-up is suspected.",
     expectedSeverity: "high",
     events: [
       {

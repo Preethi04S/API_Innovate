@@ -19,24 +19,33 @@ interface AgentPanelProps {
   contributions: AgentContribution[];
 }
 
-const AGENT_CONFIG: Record<string, { icon: React.ReactNode; gradient: string; border: string; accent: string }> = {
+const AGENT_CONFIG: Record<string, { icon: React.ReactNode; gradient: string; border: string; accent: string; leftBorder: string; bg: string; bulletColor: string }> = {
   cyber_analyst: {
     icon: <Shield className="h-4 w-4" />,
     gradient: "from-blue-500/10 to-transparent",
     border: "border-blue-500/30",
     accent: "text-blue-400",
+    leftBorder: "border-l-4 border-l-blue-500/60",
+    bg: "bg-blue-500/5",
+    bulletColor: "bg-blue-500",
   },
   facility_safety: {
     icon: <AlertTriangle className="h-4 w-4" />,
-    gradient: "from-amber-500/10 to-transparent",
-    border: "border-amber-500/30",
-    accent: "text-amber-400",
-  },
-  incident_commander: {
-    icon: <Crown className="h-4 w-4" />,
     gradient: "from-emerald-500/10 to-transparent",
     border: "border-emerald-500/30",
     accent: "text-emerald-400",
+    leftBorder: "border-l-4 border-l-emerald-500/60",
+    bg: "bg-emerald-500/5",
+    bulletColor: "bg-emerald-500",
+  },
+  incident_commander: {
+    icon: <Crown className="h-4 w-4" />,
+    gradient: "from-violet-500/10 to-transparent",
+    border: "border-violet-500/30",
+    accent: "text-violet-400",
+    leftBorder: "border-l-4 border-l-violet-500/60",
+    bg: "bg-violet-500/5",
+    bulletColor: "bg-violet-500",
   },
 };
 
@@ -70,11 +79,14 @@ export function AgentPanel({ contributions }: AgentPanelProps) {
               gradient: "from-zinc-500/8 to-transparent",
               border: "border-zinc-700/30",
               accent: "text-zinc-400",
+              leftBorder: "border-l-4 border-l-zinc-700/60",
+              bg: "bg-zinc-500/5",
+              bulletColor: "bg-zinc-500",
             };
             return (
               <div
                 key={i}
-                className={`rounded-xl border bg-gradient-to-br ${config.gradient} ${config.border} p-4 animate-fade-up`}
+                className={`rounded-xl border bg-gradient-to-br ${config.gradient} ${config.border} ${config.leftBorder} ${config.bg} p-4 animate-fade-up`}
                 style={{ animationDelay: `${i * 150}ms` }}
               >
                 <div className="flex items-center gap-3 mb-3">
@@ -87,11 +99,14 @@ export function AgentPanel({ contributions }: AgentPanelProps) {
                   </div>
                 </div>
 
-                <div className="text-sm text-zinc-300 leading-relaxed mb-3">
-                  {stripMd(agent.analysis).slice(0, 600)}
-                  {agent.analysis.length > 600 && (
-                    <span className="text-zinc-500">...</span>
-                  )}
+                <div className="mb-3">
+                  <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mb-1 block">Analysis</span>
+                  <div className="text-sm text-zinc-300 leading-relaxed">
+                    {stripMd(agent.analysis).slice(0, 600)}
+                    {agent.analysis.length > 600 && (
+                      <span className="text-zinc-500">...</span>
+                    )}
+                  </div>
                 </div>
 
                 {agent.recommendations.length > 0 && (
@@ -102,7 +117,7 @@ export function AgentPanel({ contributions }: AgentPanelProps) {
                     <ul className="mt-2 space-y-1.5">
                       {agent.recommendations.slice(0, 4).map((rec, j) => (
                         <li key={j} className="text-sm text-zinc-200 flex items-start gap-2">
-                          <span className={`mt-1.5 h-1.5 w-1.5 rounded-full shrink-0 ${config.accent.replace("text-", "bg-")}`} />
+                          <span className={`mt-1.5 h-1.5 w-1.5 rounded-full shrink-0 ${config.bulletColor}`} />
                           {stripMd(rec)}
                         </li>
                       ))}

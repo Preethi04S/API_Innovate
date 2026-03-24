@@ -52,6 +52,25 @@ function formatValue(event: TelemetryEvent): string {
   return String(event.value).slice(0, 40);
 }
 
+function getEventTypeBadgeClass(type: string): string {
+  if (["network_spike", "unknown_device", "failed_login", "data_transfer"].includes(type)) {
+    return "bg-blue-500/20 text-blue-400";
+  }
+  if (["camera_offline", "motion"].includes(type)) {
+    return "bg-orange-500/20 text-orange-400";
+  }
+  if (["temperature", "humidity"].includes(type)) {
+    return "bg-cyan-500/20 text-cyan-400";
+  }
+  if (["badge_swipe", "badge_denied", "door_open", "door_close"].includes(type)) {
+    return "bg-violet-500/20 text-violet-400";
+  }
+  if (["power_anomaly", "usb_insert", "smoke_alert"].includes(type)) {
+    return "bg-red-500/20 text-red-400";
+  }
+  return "bg-zinc-700/50 text-zinc-400";
+}
+
 export function EventStream({ events, isSimulating }: EventStreamProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -67,6 +86,15 @@ export function EventStream({ events, isSimulating }: EventStreamProps) {
           <h2 className="text-xs font-semibold text-zinc-300 uppercase tracking-wider">
             Event Stream
           </h2>
+          {isSimulating && (
+            <div className="flex items-center gap-1">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+              </span>
+              <span className="text-[9px] font-bold text-emerald-400 uppercase tracking-widest">LIVE</span>
+            </div>
+          )}
         </div>
         <Badge variant="outline" className="text-[10px] border-zinc-700/50 text-zinc-500 font-mono">
           {events.length}
@@ -74,9 +102,18 @@ export function EventStream({ events, isSimulating }: EventStreamProps) {
       </div>
       <ScrollArea className="flex-1">
         <div className="p-2 space-y-0.5">
-          {events.length === 0 && (
+          {events.length === 0 && !isSimulating && (
+            <div className="flex flex-col items-center justify-center py-16 text-zinc-600 px-4 text-center">
+              <Radio className="h-8 w-8 mb-3 opacity-20" />
+              <p className="text-xs font-medium text-zinc-500 mb-1">No telemetry data</p>
+              <p className="text-[11px] text-zinc-600 leading-relaxed">
+                Select a scenario to begin streaming telemetry events
+              </p>
+            </div>
+          )}
+          {events.length === 0 && isSimulating && (
             <div className="flex flex-col items-center justify-center py-16 text-zinc-600">
-              <Activity className="h-8 w-8 mb-3 opacity-30" />
+              <Activity className="h-8 w-8 mb-3 opacity-30 animate-pulse" />
               <p className="text-xs">Waiting for telemetry signals...</p>
             </div>
           )}
@@ -87,7 +124,7 @@ export function EventStream({ events, isSimulating }: EventStreamProps) {
                 key={event.id}
                 className={`flex items-start gap-2.5 rounded-lg px-3 py-2 text-xs animate-fade-up ${
                   isAlert
-                    ? "bg-red-500/5 border border-red-500/10"
+                    ? "bg-red-500/5 border-l-2 border-red-500/40 pl-2.5"
                     : "hover:bg-zinc-800/30"
                 }`}
               >
@@ -95,9 +132,12 @@ export function EventStream({ events, isSimulating }: EventStreamProps) {
                   {EVENT_ICONS[event.type] || <Activity className="h-3.5 w-3.5" />}
                 </span>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-1.5 flex-wrap">
                     <span className={`font-medium ${isAlert ? "text-red-300" : "text-zinc-300"}`}>
                       {EVENT_TYPE_LABELS[event.type] || event.type}
+                    </span>
+                    <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-full uppercase tracking-wide ${getEventTypeBadgeClass(event.type)}`}>
+                      {event.type.replace(/_/g, " ")}
                     </span>
                   </div>
                   <div className="flex items-center gap-2 mt-0.5">

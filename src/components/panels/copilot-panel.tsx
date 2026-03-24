@@ -14,10 +14,11 @@ interface CopilotPanelProps {
 }
 
 const QUICK_QUESTIONS = [
-  "What should I do first?",
-  "Is exfiltration still active?",
-  "How did the attacker get in?",
-  "What's the blast radius?",
+  "What is the attacker's most likely objective?",
+  "Which assets are at highest risk right now?",
+  "What's the fastest containment action?",
+  "Should we notify law enforcement?",
+  "What regulatory obligations apply to this breach?",
 ];
 
 function stripMd(text: string): string {

@@ -47,9 +47,10 @@ interface KpiCardProps {
   glowColor: string;
   trend?: "up" | "down" | "neutral";
   trendLabel?: string;
+  pulseValue?: boolean;
 }
 
-function KpiCard({ icon, label, value, suffix, color, glowColor, trend, trendLabel }: KpiCardProps) {
+function KpiCard({ icon, label, value, suffix, color, glowColor, trend, trendLabel, pulseValue }: KpiCardProps) {
   return (
     <div className={`relative group rounded-xl border border-white/[0.14] bg-[#0f1724] p-5 overflow-hidden transition-all hover:border-white/[0.25] hover:scale-[1.02] duration-200`}>
       {/* Subtle glow on hover */}
@@ -61,7 +62,7 @@ function KpiCard({ icon, label, value, suffix, color, glowColor, trend, trendLab
             {label}
           </p>
           <div className="flex items-baseline gap-1.5">
-            <span className={`text-4xl font-black tracking-tight ${color}`}>
+            <span className={`text-4xl font-black tracking-tight ${color} ${pulseValue ? "animate-pulse" : ""}`}>
               <AnimatedNumber value={value} />
             </span>
             {suffix && (
@@ -124,8 +125,9 @@ export function KpiRow({ events, incident, isSimulating, isAnalyzing }: KpiRowPr
         label="Threat Level"
         value={threatLevel}
         suffix="%"
-        color={threatLevel > 70 ? "text-red-400" : threatLevel > 40 ? "text-amber-400" : "text-emerald-400"}
-        glowColor={threatLevel > 70 ? "bg-gradient-to-br from-red-500/5 to-transparent" : "bg-gradient-to-br from-emerald-500/5 to-transparent"}
+        color={threatLevel > 80 ? "text-red-400" : threatLevel >= 50 ? "text-orange-400" : "text-emerald-400"}
+        glowColor={threatLevel > 80 ? "bg-gradient-to-br from-red-500/5 to-transparent" : "bg-gradient-to-br from-emerald-500/5 to-transparent"}
+        pulseValue={threatLevel > 80}
       />
       <KpiCard
         icon={<Radio className="h-4 w-4" />}

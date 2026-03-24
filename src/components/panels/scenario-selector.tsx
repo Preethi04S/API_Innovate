@@ -26,6 +26,12 @@ const SEVERITY_STYLES: Record<string, string> = {
   medium: "bg-yellow-500/10 text-yellow-400 border-yellow-500/30",
 };
 
+const SEVERITY_GRADIENT: Record<string, string> = {
+  critical: "bg-gradient-to-br from-red-900/20 via-zinc-900/50 to-zinc-900/30",
+  high: "bg-gradient-to-br from-orange-900/15 via-zinc-900/50 to-zinc-900/30",
+  medium: "bg-gradient-to-br from-yellow-900/15 via-zinc-900/50 to-zinc-900/30",
+};
+
 const SCENARIO_ICONS: Record<string, React.ReactNode> = {
   "scenario-rogue-camera": <Wifi className="h-5 w-5" />,
   "scenario-server-overheating": <Flame className="h-5 w-5" />,
@@ -79,13 +85,15 @@ export function ScenarioSelector({
           const colors = SCENARIO_COLORS[scenario.id] || "from-zinc-500/10 to-transparent border-zinc-700 hover:border-zinc-600";
           const iconColor = SCENARIO_ICON_COLORS[scenario.id] || "text-zinc-400";
 
+          const severityGradient = SEVERITY_GRADIENT[scenario.expectedSeverity] || "";
+
           return (
             <div
               key={scenario.id}
-              className={`group relative rounded-xl border bg-gradient-to-b transition-all duration-300 cursor-pointer ${
+              className={`group relative rounded-xl border transition-all duration-300 cursor-pointer ${
                 isActive
-                  ? "border-emerald-500/50 bg-gradient-to-b from-emerald-500/10 to-transparent ring-1 ring-emerald-500/20"
-                  : colors
+                  ? "border-emerald-500/50 bg-gradient-to-br from-emerald-900/20 via-zinc-900/50 to-zinc-900/30 ring-1 ring-emerald-500/20 shadow-lg shadow-emerald-500/5"
+                  : `${severityGradient} ${colors} hover:shadow-lg`
               }`}
               onClick={() => !isSimulating && onStart(scenario.id)}
             >
@@ -107,8 +115,8 @@ export function ScenarioSelector({
                     <h3 className="text-sm font-semibold text-zinc-200 leading-tight mb-1">
                       {scenario.name}
                     </h3>
-                    <p className="text-[11px] text-zinc-500 line-clamp-2 leading-relaxed">
-                      {scenario.description}
+                    <p className="text-[11px] text-zinc-400 line-clamp-2 leading-relaxed">
+                      {scenario.description.slice(0, 80)}{scenario.description.length > 80 ? "…" : ""}
                     </p>
                   </div>
                 </div>
@@ -121,8 +129,8 @@ export function ScenarioSelector({
                     >
                       {scenario.expectedSeverity}
                     </Badge>
-                    <span className="text-[10px] text-zinc-600">
-                      {scenario.eventCount} signals
+                    <span className="text-[9px] font-medium px-1.5 py-0.5 rounded-full bg-zinc-800/80 text-zinc-400 border border-zinc-700/50">
+                      {scenario.eventCount} events
                     </span>
                   </div>
 

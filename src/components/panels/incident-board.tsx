@@ -95,7 +95,17 @@ export function IncidentBoard({
   const style = SEVERITY_CONFIG[incident.severity] || SEVERITY_CONFIG.info;
 
   return (
-    <div className={`rounded-xl border ${style.border} ${style.bg} p-5 shadow-lg ${style.glow} animate-fade-up`}>
+    <div className={`rounded-xl border ${style.border} ${style.bg} shadow-lg ${style.glow} animate-fade-up overflow-hidden`}>
+      {incident.severity === "critical" && (
+        <div className="flex items-center gap-2 px-5 py-2 bg-red-500/10 border-b border-red-500/20 animate-pulse">
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
+          </span>
+          <span className="text-[11px] font-black text-red-400 uppercase tracking-widest">⚠ Active Incident — Immediate Action Required</span>
+        </div>
+      )}
+      <div className="p-5">
       {/* Header */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex-1">
@@ -171,6 +181,7 @@ export function IncidentBoard({
             ))}
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

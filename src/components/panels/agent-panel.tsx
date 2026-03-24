@@ -77,32 +77,32 @@ export function AgentPanel({ contributions }: AgentPanelProps) {
                 className={`rounded-xl border bg-gradient-to-br ${config.gradient} ${config.border} p-4 animate-fade-up`}
                 style={{ animationDelay: `${i * 150}ms` }}
               >
-                <div className="flex items-center gap-2.5 mb-3">
-                  <div className={`p-1.5 rounded-lg bg-zinc-900/50 border border-zinc-800/50 ${config.accent}`}>
+                <div className="flex items-center gap-3 mb-3">
+                  <div className={`p-2 rounded-xl bg-zinc-900/60 border border-zinc-800/60 ${config.accent}`}>
                     {config.icon}
                   </div>
                   <div>
-                    <span className="text-sm font-semibold text-zinc-200">{agent.role}</span>
-                    <span className="text-[9px] text-zinc-600 ml-2 uppercase tracking-wider">Agent</span>
+                    <span className="text-base font-bold text-zinc-100">{agent.role}</span>
+                    <span className="text-[10px] text-zinc-500 ml-2 uppercase tracking-wider font-semibold">Agent</span>
                   </div>
                 </div>
 
-                <div className="text-[11px] text-zinc-400 leading-relaxed mb-3">
+                <div className="text-sm text-zinc-300 leading-relaxed mb-3">
                   {stripMd(agent.analysis).slice(0, 600)}
                   {agent.analysis.length > 600 && (
-                    <span className="text-zinc-600">...</span>
+                    <span className="text-zinc-500">...</span>
                   )}
                 </div>
 
                 {agent.recommendations.length > 0 && (
-                  <div className="border-t border-zinc-800/30 pt-2.5">
-                    <span className="text-[9px] font-semibold text-zinc-500 uppercase tracking-wider">
+                  <div className="border-t border-zinc-800/40 pt-3">
+                    <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">
                       Recommendations
                     </span>
-                    <ul className="mt-1.5 space-y-1">
+                    <ul className="mt-2 space-y-1.5">
                       {agent.recommendations.slice(0, 4).map((rec, j) => (
-                        <li key={j} className="text-[11px] text-zinc-300 flex items-start gap-1.5">
-                          <span className={`mt-1 h-1 w-1 rounded-full shrink-0 ${config.accent.replace("text-", "bg-")}`} />
+                        <li key={j} className="text-sm text-zinc-200 flex items-start gap-2">
+                          <span className={`mt-1.5 h-1.5 w-1.5 rounded-full shrink-0 ${config.accent.replace("text-", "bg-")}`} />
                           {stripMd(rec)}
                         </li>
                       ))}

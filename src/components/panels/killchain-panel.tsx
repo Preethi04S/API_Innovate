@@ -98,13 +98,13 @@ export function KillChainPanel({ incident, events }: KillChainPanelProps) {
     <div className="flex flex-col h-full p-3">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <Shield className="h-3.5 w-3.5 text-zinc-600" />
-          <span className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">
+          <Shield className="h-4 w-4 text-zinc-500" />
+          <span className="text-xs font-bold text-zinc-300 uppercase tracking-wider">
             ATT&CK Kill Chain
           </span>
         </div>
         {activeCount > 0 && (
-          <span className="text-[9px] font-bold text-red-400 bg-red-500/10 border border-red-500/20 rounded px-1.5 py-0.5 uppercase tracking-wider">
+          <span className="text-[10px] font-black text-red-400 bg-red-500/15 border border-red-500/30 rounded-md px-2 py-0.5 uppercase tracking-wider">
             {activeCount}/{KILL_CHAIN_STAGES.length} Stages
           </span>
         )}
@@ -130,10 +130,10 @@ export function KillChainPanel({ incident, events }: KillChainPanelProps) {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between">
-                    <span className={`text-[11px] font-semibold ${isActive ? stage.activeText : "text-zinc-600"}`}>
+                    <span className={`text-sm font-bold ${isActive ? stage.activeText : "text-zinc-600"}`}>
                       {stage.label}
                     </span>
-                    <span className={`text-[9px] font-mono ${isActive ? "text-zinc-500" : "text-zinc-700"}`}>
+                    <span className={`text-xs font-mono font-semibold ${isActive ? "text-zinc-400" : "text-zinc-700"}`}>
                       {stage.mitre}
                     </span>
                   </div>
@@ -155,7 +155,7 @@ export function KillChainPanel({ incident, events }: KillChainPanelProps) {
       </div>
 
       {/* Summary */}
-      <div className={`mt-2 pt-2 border-t border-zinc-800/40 text-center text-[10px] ${activeCount >= 4 ? "text-red-400" : activeCount >= 2 ? "text-amber-400" : "text-zinc-600"}`}>
+      <div className={`mt-2 pt-2 border-t border-zinc-800/40 text-center text-xs font-semibold ${activeCount >= 4 ? "text-red-400" : activeCount >= 2 ? "text-amber-400" : "text-zinc-600"}`}>
         {activeCount === 0
           ? "No attack stages detected"
           : activeCount >= 4

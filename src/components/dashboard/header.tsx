@@ -14,49 +14,49 @@ interface HeaderProps {
 
 export function Header({ onReset, onInstantDemo, activeScenario, eventCount, isAnalyzing, isDemoMode }: HeaderProps) {
   return (
-    <header className="border-b border-white/[0.12] bg-[#0c1220] px-6 py-3 sticky top-0 z-50">
+    <header className="border-b border-white/[0.15] bg-[#0c1220] px-6 py-4 sticky top-0 z-50 shadow-lg shadow-black/30">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <div className="relative">
-            <div className="absolute inset-0 bg-emerald-500/20 rounded-lg blur-md" />
-            <div className="relative bg-zinc-900 border border-emerald-500/30 rounded-lg p-2">
-              <Shield className="h-6 w-6 text-emerald-400" />
+            <div className="absolute inset-0 bg-emerald-500/30 rounded-xl blur-lg" />
+            <div className="relative bg-zinc-900 border border-emerald-500/40 rounded-xl p-2.5">
+              <Shield className="h-7 w-7 text-emerald-400" />
             </div>
           </div>
           <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-lg font-bold text-zinc-50 tracking-tight">SentinelMesh</h1>
-              <span className="text-[9px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded px-1.5 py-0.5 uppercase tracking-widest">
+            <div className="flex items-center gap-2.5">
+              <h1 className="text-xl font-black text-zinc-50 tracking-tight">SentinelMesh</h1>
+              <span className="text-[10px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 rounded-md px-2 py-0.5 uppercase tracking-widest">
                 Live
               </span>
               {isDemoMode && (
-                <span className="text-[9px] font-bold bg-violet-500/20 text-violet-300 border border-violet-500/30 rounded px-1.5 py-0.5 uppercase tracking-widest animate-pulse">
+                <span className="text-[10px] font-black bg-violet-500/20 text-violet-300 border border-violet-500/40 rounded-md px-2 py-0.5 uppercase tracking-widest animate-pulse">
                   Demo
                 </span>
               )}
             </div>
-            <p className="text-[11px] text-zinc-500 tracking-wide">
+            <p className="text-xs text-zinc-400 tracking-wide mt-0.5">
               Cyber-Physical Defense Copilot — Powered by ASI-1
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
           {/* Status indicators */}
-          <div className="hidden md:flex items-center gap-4 text-[11px]">
-            <div className="flex items-center gap-1.5 text-zinc-500">
-              <Radio className={`h-3 w-3 ${activeScenario ? "text-emerald-400 animate-pulse" : "text-zinc-600"}`} />
-              <span>{activeScenario ? "Scenario Active" : "Standby"}</span>
+          <div className="hidden md:flex items-center gap-5 text-xs">
+            <div className="flex items-center gap-2 text-zinc-400">
+              <Radio className={`h-3.5 w-3.5 ${activeScenario ? "text-emerald-400 animate-pulse" : "text-zinc-600"}`} />
+              <span className="font-medium">{activeScenario ? "Scenario Active" : "Standby"}</span>
             </div>
-            <div className="w-px h-4 bg-zinc-800" />
-            <div className="flex items-center gap-1.5 text-zinc-500">
-              <Activity className={`h-3 w-3 ${isAnalyzing ? "text-amber-400 animate-pulse" : "text-zinc-600"}`} />
-              <span>{isAnalyzing ? "Analyzing..." : "Idle"}</span>
+            <div className="w-px h-5 bg-zinc-700" />
+            <div className="flex items-center gap-2 text-zinc-400">
+              <Activity className={`h-3.5 w-3.5 ${isAnalyzing ? "text-amber-400 animate-pulse" : "text-zinc-600"}`} />
+              <span className="font-medium">{isAnalyzing ? "Analyzing..." : "Idle"}</span>
             </div>
-            <div className="w-px h-4 bg-zinc-800" />
-            <div className="flex items-center gap-1.5">
-              <span className="text-zinc-500">Events:</span>
-              <span className="font-mono text-zinc-300">{eventCount}</span>
+            <div className="w-px h-5 bg-zinc-700" />
+            <div className="flex items-center gap-2">
+              <span className="text-zinc-500 font-medium">Events:</span>
+              <span className="font-mono font-bold text-zinc-200 text-sm">{eventCount}</span>
             </div>
           </div>
 
@@ -65,9 +65,9 @@ export function Header({ onReset, onInstantDemo, activeScenario, eventCount, isA
             size="sm"
             onClick={onInstantDemo}
             disabled={isAnalyzing}
-            className="bg-violet-600 hover:bg-violet-500 disabled:bg-zinc-800 disabled:text-zinc-500 text-white font-semibold border-0 h-8 text-xs gap-1.5"
+            className="bg-violet-600 hover:bg-violet-500 disabled:bg-zinc-800 disabled:text-zinc-500 text-white font-bold border-0 h-9 px-4 text-sm gap-2 shadow-lg shadow-violet-500/20"
           >
-            <Zap className="h-3.5 w-3.5" />
+            <Zap className="h-4 w-4" />
             Instant Demo
           </Button>
 
@@ -75,9 +75,9 @@ export function Header({ onReset, onInstantDemo, activeScenario, eventCount, isA
             variant="outline"
             size="sm"
             onClick={onReset}
-            className="text-zinc-400 border-zinc-700/50 bg-zinc-900/50 hover:bg-zinc-800 hover:text-zinc-200 text-xs h-8"
+            className="text-zinc-400 border-zinc-700/60 bg-zinc-900/60 hover:bg-zinc-800 hover:text-zinc-200 text-sm h-9 px-3"
           >
-            <RotateCcw className="h-3 w-3 mr-1.5" />
+            <RotateCcw className="h-3.5 w-3.5 mr-2" />
             Reset
           </Button>
         </div>

@@ -51,26 +51,26 @@ interface KpiCardProps {
 
 function KpiCard({ icon, label, value, suffix, color, glowColor, trend, trendLabel }: KpiCardProps) {
   return (
-    <div className={`relative group rounded-xl border border-white/[0.12] bg-[#0f1724] p-4 overflow-hidden transition-all hover:border-white/[0.2]`}>
+    <div className={`relative group rounded-xl border border-white/[0.14] bg-[#0f1724] p-5 overflow-hidden transition-all hover:border-white/[0.25] hover:scale-[1.02] duration-200`}>
       {/* Subtle glow on hover */}
       <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ${glowColor}`} />
 
       <div className="relative flex items-start justify-between">
         <div>
-          <p className="text-[10px] font-semibold text-zinc-500 uppercase tracking-[0.15em] mb-2">
+          <p className="text-xs font-bold text-zinc-500 uppercase tracking-[0.15em] mb-2">
             {label}
           </p>
-          <div className="flex items-baseline gap-1">
-            <span className={`text-3xl font-bold tracking-tight ${color}`}>
+          <div className="flex items-baseline gap-1.5">
+            <span className={`text-4xl font-black tracking-tight ${color}`}>
               <AnimatedNumber value={value} />
             </span>
             {suffix && (
-              <span className="text-sm text-zinc-500 font-medium">{suffix}</span>
+              <span className="text-base text-zinc-400 font-semibold">{suffix}</span>
             )}
           </div>
           {trend && trendLabel && (
-            <div className="flex items-center gap-1 mt-1.5">
-              <span className={`text-[10px] font-medium ${
+            <div className="flex items-center gap-1 mt-2">
+              <span className={`text-xs font-semibold ${
                 trend === "up" ? "text-red-400" : trend === "down" ? "text-emerald-400" : "text-zinc-500"
               }`}>
                 {trend === "up" ? "↑" : trend === "down" ? "↓" : "→"} {trendLabel}
@@ -78,7 +78,7 @@ function KpiCard({ icon, label, value, suffix, color, glowColor, trend, trendLab
             </div>
           )}
         </div>
-        <div className={`p-2 rounded-lg bg-white/[0.03] border border-white/[0.05] ${color}`}>
+        <div className={`p-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] ${color}`}>
           {icon}
         </div>
       </div>
@@ -102,7 +102,7 @@ export function KpiRow({ events, incident, isSimulating, isAnalyzing }: KpiRowPr
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2">
       <KpiCard
-        icon={<Activity className="h-4 w-4" />}
+        icon={<Activity className="h-5 w-5" />}
         label="Events Ingested"
         value={events.length}
         color="text-cyan-400"

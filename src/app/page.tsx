@@ -78,7 +78,12 @@ export default function Dashboard() {
   useEffect(() => {
     fetchScenarios();
     fetchAssets();
-  }, [fetchScenarios, fetchAssets]);
+    // Auto-load demo so judges never see empty state
+    const timer = setTimeout(() => {
+      loadDemoResult();
+    }, 1200);
+    return () => clearTimeout(timer);
+  }, [fetchScenarios, fetchAssets, loadDemoResult]);
 
   // Trigger critical alert when a new CRITICAL incident is detected
   useEffect(() => {
@@ -190,55 +195,55 @@ export default function Dashboard() {
                 />
 
                 {/* Detail Tabs */}
-                <Panel className="h-[400px]">
+                <Panel className="h-[420px]">
                   <Tabs defaultValue="agents" className="h-full flex flex-col">
-                    <TabsList className="bg-transparent border-b border-white/[0.04] rounded-none px-3 h-10 shrink-0 gap-0">
+                    <TabsList className="bg-transparent border-b border-white/[0.06] rounded-none px-3 h-12 shrink-0 gap-1">
                       <TabsTrigger
                         value="agents"
-                        className="text-[11px] data-[state=active]:bg-white/[0.04] data-[state=active]:text-zinc-200 rounded-md px-3 gap-1.5"
+                        className="text-xs font-semibold data-[state=active]:bg-white/[0.06] data-[state=active]:text-zinc-100 rounded-lg px-3 gap-2 h-8"
                       >
-                        <Bot className="h-3 w-3" />
+                        <Bot className="h-3.5 w-3.5" />
                         Agents
                         {state.agentContributions.length > 0 && (
-                          <span className="ml-1 h-4 min-w-4 rounded-full bg-emerald-500/20 text-emerald-400 text-[9px] font-bold flex items-center justify-center px-1">
+                          <span className="ml-1 h-5 min-w-5 rounded-full bg-emerald-500/25 text-emerald-400 text-[10px] font-bold flex items-center justify-center px-1">
                             {state.agentContributions.length}
                           </span>
                         )}
                       </TabsTrigger>
                       <TabsTrigger
                         value="copilot"
-                        className="text-[11px] data-[state=active]:bg-white/[0.04] data-[state=active]:text-zinc-200 rounded-md px-3 gap-1.5"
+                        className="text-xs font-semibold data-[state=active]:bg-white/[0.06] data-[state=active]:text-zinc-100 rounded-lg px-3 gap-2 h-8"
                       >
-                        <Sparkles className="h-3 w-3 text-violet-400" />
+                        <Sparkles className="h-3.5 w-3.5 text-violet-400" />
                         Ask ASI-1
                         {state.chatMessages.length > 0 && (
-                          <span className="ml-1 h-4 min-w-4 rounded-full bg-violet-500/20 text-violet-400 text-[9px] font-bold flex items-center justify-center px-1">
+                          <span className="ml-1 h-5 min-w-5 rounded-full bg-violet-500/25 text-violet-400 text-[10px] font-bold flex items-center justify-center px-1">
                             {state.chatMessages.filter(m => m.role === "assistant").length}
                           </span>
                         )}
                       </TabsTrigger>
                       <TabsTrigger
                         value="evidence"
-                        className="text-[11px] data-[state=active]:bg-white/[0.04] data-[state=active]:text-zinc-200 rounded-md px-3 gap-1.5"
+                        className="text-xs font-semibold data-[state=active]:bg-white/[0.06] data-[state=active]:text-zinc-100 rounded-lg px-3 gap-2 h-8"
                       >
-                        <FileSearch className="h-3 w-3" />
+                        <FileSearch className="h-3.5 w-3.5" />
                         Evidence
                       </TabsTrigger>
                       <TabsTrigger
                         value="actions"
-                        className="text-[11px] data-[state=active]:bg-white/[0.04] data-[state=active]:text-zinc-200 rounded-md px-3 gap-1.5"
+                        className="text-xs font-semibold data-[state=active]:bg-white/[0.06] data-[state=active]:text-zinc-100 rounded-lg px-3 gap-2 h-8"
                       >
-                        <CheckCircle2 className="h-3 w-3" />
+                        <CheckCircle2 className="h-3.5 w-3.5" />
                         Actions
                       </TabsTrigger>
                       <TabsTrigger
                         value="tools"
-                        className="text-[11px] data-[state=active]:bg-white/[0.04] data-[state=active]:text-zinc-200 rounded-md px-3 gap-1.5"
+                        className="text-xs font-semibold data-[state=active]:bg-white/[0.06] data-[state=active]:text-zinc-100 rounded-lg px-3 gap-2 h-8"
                       >
-                        <Wrench className="h-3 w-3" />
+                        <Wrench className="h-3.5 w-3.5" />
                         Tools
                         {state.toolCalls.length > 0 && (
-                          <span className="ml-1 h-4 min-w-4 rounded-full bg-blue-500/20 text-blue-400 text-[9px] font-bold flex items-center justify-center px-1">
+                          <span className="ml-1 h-5 min-w-5 rounded-full bg-blue-500/25 text-blue-400 text-[10px] font-bold flex items-center justify-center px-1">
                             {state.toolCalls.length}
                           </span>
                         )}
